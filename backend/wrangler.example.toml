@@ -1,0 +1,10 @@
+# Copy to wrangler.toml and fill in your own D1 database id.
+name = "hive"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hive"
+database_id = "<your-d1-database-id>"

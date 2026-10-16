@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #6b7280; --border: #e5e7eb;
+    --accent: #2563eb; --accent-fg: #ffffff; --on: #16a34a; --off: #d1d5db;
+    --card: #f9fafb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a; --fg: #f3f4f6; --muted: #9ca3af; --border: #374151;
+      --accent: #3b82f6; --on: #22c55e; --off: #4b5563; --card: #111827;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    width: 320px; margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--fg);
+  }
+  header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+  }
+  header img { width: 28px; height: 28px; border-radius: 6px; }
+  header .title { font-size: 16px; font-weight: 700; letter-spacing: 0.3px; }
+  header .tag { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .section { padding: 14px 16px; }
+  .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 8px; }
+  .engine {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 10px; border-radius: 8px; background: var(--card);
+    margin-bottom: 6px; font-size: 13px;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--off); flex: none; }
+  .dot.on { background: var(--on); box-shadow: 0 0 0 3px color-mix(in srgb, var(--on) 25%, transparent); }
+  .engine .name { font-weight: 500; }
+  .engine .state { margin-inline-start: auto; font-size: 11px; color: var(--muted); }
+  .btn {
+    display: block; width: 100%; padding: 11px 14px; border: none; border-radius: 9px;
+    background: var(--accent); color: var(--accent-fg); font-size: 14px; font-weight: 600;
+    cursor: pointer; text-align: center; text-decoration: none;
+  }
+  .btn:hover { filter: brightness(1.05); }
+  .hint {
+    font-size: 12px; color: var(--muted); line-height: 1.45; margin-top: 10px;
+    padding: 9px 11px; background: var(--card); border-radius: 8px;
+  }
+  .hint.show { display: block; }
+  .hint.hide { display: none; }
+  footer { padding: 10px 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+  <header>
+    <img src="icons/icon48.png" alt="HIVE">
+    <div>
+      <div class="title">HIVE</div>
+      <div class="tag">Ask your AIs together</div>
+    </div>
+  </header>
+
+  <!-- 3.6.5: the one action a new user needs sits first; it was third, under an advanced option. -->
+  <div class="section">
+    <a class="btn" id="open-hive" href="#">Open HIVE ›</a>
+    <div class="hint show" style="margin-top:10px;">
+      Opens HIVE and connects this extension automatically — no setup needed.
+    </div>
+  </div>
+
+  <div class="section" style="padding-top:0;">
+    <div class="label">Your AI engines</div>
+    <div class="engine"><span class="dot" id="dot-chatgpt"></span><span class="name">ChatGPT</span><span class="state" id="state-chatgpt">checking…</span></div>
+    <div class="engine"><span class="dot" id="dot-gemini"></span><span class="name">Gemini</span><span class="state" id="state-gemini">checking…</span></div>
+    <div class="engine"><span class="dot" id="dot-claude"></span><span class="name">Claude</span><span class="state" id="state-claude">checking…</span></div>
+
+    <div class="hint hide" id="hint-none">
+      Open <b>ChatGPT</b>, <b>Gemini</b>, or <b>Claude</b> in a tab and sign in. HIVE asks the ones you have open.
+    </div>
+  </div>
+
+  <details class="section" style="padding-top:0;">
+    <summary class="label" style="cursor:pointer;list-style:none;">Advanced · connect any AI provider ›</summary>
+    <div class="engine" style="cursor:default;margin-top:8px;">
+      <span class="dot" id="dot-proxy"></span>
+      <span class="name">Custom API providers</span>
+      <span class="state" id="state-proxy">off</span>
+    </div>
+    <button class="btn" id="enable-proxy"
+            style="background:var(--card);color:var(--fg);border:1px solid var(--border);margin-top:6px;">Enable</button>
+    <div class="hint show" style="margin-top:8px;">
+      Lets HIVE reach <b>any</b> OpenAI-compatible API you add in Settings — OpenRouter, Groq, DeepSeek, xAI/Grok, or a local model — even providers that block direct browser access. Access is requested only when you click, and can be removed anytime.
+    </div>
+  </details>
+
+
+  <footer id="footer">HIVE Bridge</footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HIVE — Privacy Policy</title>
+<style>
+  :root { color-scheme: light dark; --fg:#1a1a1a; --muted:#666; --bg:#fff; --card:#f7f7f5; --accent:#064C77; --border:#e6e6e0; }
+  @media (prefers-color-scheme: dark){ :root{ --fg:#e8e8e8; --muted:#9aa0a6; --bg:#16181d; --card:#1e2128; --accent:#6db3e8; --border:#2a2e37; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; line-height:1.65; }
+  .wrap { max-width:760px; margin:0 auto; padding:40px 22px 80px; }
+  h1 { font-size:30px; margin:0 0 4px; }
+  h2 { font-size:19px; margin:34px 0 8px; }
+  .sub { color:var(--muted); font-size:14px; margin-bottom:28px; }
+  p, li { font-size:15.5px; }
+  a { color:var(--accent); }
+  .tldr { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 18px; margin:8px 0 8px; }
+  .tldr ul { margin:8px 0 0; padding-inline-start:20px; }
+  code { background:var(--card); padding:1px 5px; border-radius:4px; font-size:13px; }
+  .back { display:inline-block; margin-bottom:18px; font-size:14px; }
+  footer { margin-top:40px; color:var(--muted); font-size:13px; border-top:1px solid var(--border); padding-top:16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">← Back to HIVE</a>
+  <h1>HIVE — Privacy Policy</h1>
+  <div class="sub">Last updated: 23 June 2026</div>
+
+  <p>HIVE lets you ask one question across the AI assistants you already use (ChatGPT, Gemini, Claude) and get a single, cross‑checked answer. It is made of a web app (this site) and an optional Chrome extension ("HIVE Bridge"). This policy explains, in plain language, exactly what data is handled and where it goes.</p>
+
+  <div class="tldr">
+    <strong>The short version</strong>
+    <ul>
+      <li>Your questions and answers are processed <strong>in your browser</strong>. In normal use, no HIVE server sees them.</li>
+      <li>HIVE has <strong>no passive analytics or tracking</strong>. We do not sell or share your data, and there are no ads.</li>
+      <li>The <strong>only</strong> time data reaches a HIVE server is a bug report <strong>you explicitly choose to send</strong>.</li>
+      <li>If you use API mode, your API keys are stored <strong>only in your browser</strong> and are sent only to the AI provider — never to HIVE.</li>
+    </ul>
+  </div>
+
+  <h2>1. Your questions and answers</h2>
+  <p>When you ask HIVE a question, it is sent to whichever AI assistants you have connected, and the answers are combined in your browser. HIVE does not run a server that receives, stores, or logs your questions or answers during normal use.</p>
+  <ul>
+    <li><strong>Scrape mode (default):</strong> the extension types your question into your <em>existing, logged‑in</em> ChatGPT / Gemini / Claude tabs and reads back the answer. Each provider receives and stores that text the same way it stores anything else you type there, under <em>their</em> privacy policy.</li>
+    <li><strong>API mode (bring your own key):</strong> your question goes directly from your browser to the AI provider using your own API key. Your keys live only in your browser's <code>localStorage</code> and are never transmitted to HIVE.</li>
+    <li><strong>Fan‑out:</strong> Panel and Conductor modes send your question to more than one provider in parallel. If a question is sensitive, use Single‑provider mode in Settings.</li>
+  </ul>
+
+  <h2>2. Bug reports (the one thing that reaches a HIVE server)</h2>
+  <p>If — and only if — you click <strong>"Report a problem"</strong> and choose to send it, HIVE transmits a diagnostic bundle to its server (<code>hive.niryanush.workers.dev</code>) so the developer can reproduce and fix the issue. That bundle contains: the note you type, your current question, the last few messages on screen, the page URL, your browser/user‑agent string, and an anonymous identifier. Nothing is sent unless you actively submit a report.</p>
+
+  <h2>3. The optional Encyclopedia / contribution feature</h2>
+  <p>HIVE includes an opt‑in public‑knowledge feature. It is off by default and only runs if you explicitly turn it on. When enabled, it submits topic‑based encyclopedia content (never your personal files or private questions) to the HIVE backend, tagged with an anonymous contributor identifier. You can stop it at any time.</p>
+
+  <h2>4. What HIVE does <em>not</em> do</h2>
+  <ul>
+    <li>No passive telemetry, analytics, or behavioural tracking.</li>
+    <li>No selling, renting, or sharing of your data with third parties.</li>
+    <li>No advertising and no advertising identifiers.</li>
+    <li>No reading of pages other than your open ChatGPT / Gemini / Claude tabs.</li>
+  </ul>
+
+  <h2>5. Browser permissions and why</h2>
+  <p>The HIVE Bridge extension requests only what it needs to do its single job — relay one question to your AI tabs and read the answers back:</p>
+  <ul>
+    <li><strong>Host access</strong> to <code>chatgpt.com</code>, <code>chat.openai.com</code>, <code>gemini.google.com</code>, <code>claude.ai</code> — to type your question into those tabs and read the response.</li>
+    <li><strong>Tabs / scripting</strong> — to locate your open AI tabs and run the small relay script inside them.</li>
+  </ul>
+  <p>The extension communicates only with this web app (<code>hive-ny.pages.dev</code>) and never injects into or reads any other website.</p>
+
+  <h2>6. Data retention</h2>
+  <p>Bug reports you submit are retained only as long as needed to diagnose and fix issues. API keys and your preferences live in your browser and are removed when you clear the site's data or uninstall. To request deletion of a bug report you sent, contact us with the approximate time you submitted it.</p>
+
+  <h2>7. Children</h2>
+  <p>HIVE is not directed to children under 13 and does not knowingly collect data from them.</p>
+
+  <h2>8. Changes</h2>
+  <p>If this policy changes materially, the "Last updated" date above will change and the new version will be posted here.</p>
+
+  <h2>9. Contact</h2>
+  <p>Questions or requests: <a href="mailto:niryanush@gmail.com">niryanush@gmail.com</a>.</p>
+
+  <footer>
+    HIVE by NY · This page is the privacy policy referenced by the HIVE Bridge Chrome extension and the HIVE web app.
+  </footer>
+</div>
+</body>
+</html>

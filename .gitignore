@@ -1,0 +1,9 @@
+# HIVE public repo
+node_modules/
+.wrangler/
+*.zip
+*.log
+.env
+credentials.json
+wrangler.toml
+backend/.dev.vars

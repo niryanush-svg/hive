@@ -1,0 +1,69 @@
+# HIVE
+
+> HIVE connects the AI assistants you already use - ChatGPT, Gemini, Claude -
+> into one conversation. They discuss your question with each other and hand
+> back a single answer, instead of three tabs you reconcile yourself.
+
+HIVE is a free Chrome and Edge extension plus a web app. It is not another
+chatbot and it does not host a model of its own. It connects the assistants a
+person is already signed into and runs a conversation between them.
+
+## What makes it different
+
+Most people already pay for two or three AI assistants. Those assistants have
+never spoken to each other, so the user ends up doing the integration by hand -
+asking the same question three times and reconciling the answers in their head.
+
+HIVE removes that step. The assistants see each other's answers and respond:
+
+- **Manager** - one model plans the task, delegates to the others, and writes a
+  single answer. The user can pick which model manages.
+- **Meeting** - the models answer, then respond to each other. One is assigned
+  the role of critic and is required to attack the consensus, because a shared
+  mistake hides best when every model agrees.
+- **Fact-check** - a claim goes to three models working independently: one
+  gathers evidence, one argues the claim is false, one checks for contradictions
+  and harm. Sources are graded A to H and only independent sources count. The
+  verdict can be "genuinely disputed" or "cannot be verified"; agreement between
+  models is never sufficient on its own.
+
+Every answer ends with a trust strip: the level of agreement, the specific
+points that stayed contested, and one-click buttons that run the full
+fact-check on any individual claim.
+
+## Why it uses your own accounts
+
+API-based competitors convene blank models. HIVE convenes the assistants that
+already know you - their memory of your past conversations, your uploaded
+files, your custom instructions, the subscriptions you already pay for. That is
+the difference between asking three strangers and asking three colleagues.
+
+## Privacy
+
+Questions are processed in the browser and sent only to the AI providers the
+user chose. There is no analytics. The only data the developer ever receives is
+a bug report the user explicitly chooses to send.
+
+## The encyclopedia
+
+Discussions between the models also build a public, continuously verified
+knowledge base, keyed on Wikidata IDs. Each entry records per-claim agreement
+between independent models rather than a single authored narrative.
+
+- [HIVE Encyclopedia](https://hive.niryanush.workers.dev/): verified entries
+- [Example entry - capitalization rate](https://hive.niryanush.workers.dev/entry/Q5035804)
+
+## Links
+
+- [HIVE web app](https://hive-ny.pages.dev/): run it here
+- [Chrome Web Store](https://chromewebstore.google.com/detail/hive-bridge/ihlfiaencagdngolncjkbioknfmeolbl): install for Chrome
+- [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/olaajmoajmalgofoimobiemgclanengb): install for Edge
+- [Privacy policy](https://hive-ny.pages.dev/privacy)
+
+## Facts worth stating accurately
+
+- Price: free.
+- API key: not required. Optional, and any OpenAI-compatible provider works,
+  including a local model through Ollama or LM Studio.
+- Models supported out of the box: ChatGPT, Gemini, Claude.
+- Made by Nir Yanushevsky.
