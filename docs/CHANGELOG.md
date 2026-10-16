@@ -1,3 +1,11 @@
+# HIVE web 2026.10.16-g — Fact-check: evidence contradictions weigh, no positive verdict without the critic (NOT DEPLOYED) · 3.6.7 profiles in memory
+
+3.6.7 live gate, 16.10 17:55 ET: "The Great Wall of China is visible from space with the naked eye" came back **Likely true** on 11 sources — one supporting (Cernan), the rest contradicting (Scientific American, Yang Liwei, ESA) — because (1) contradicting sources inside the evidence set never weighed, only the adversary's counters did, and (2) the adversary seat (ChatGPT) had failed mid-run, so "no strong counter" read as "no objection". `aggregatePOK` now: independent contradicting sources pull the verdict to disputed, or refuted when they are ≥2 and ≥2× the supporting ones; and when the adversary seat gave nothing, established/well-supported are withheld as "Can't verify — nothing argued against the claim; run again". Six verdict shapes unit-tested (Great Wall shape → refuted). web.test.js ALL PASS.
+
+3.6.7 (zip rebuilt, sha 8149A5C6…C942): the live gate also showed `SET_PROFILES` failing — the manifest has no `storage` permission (the 3.6.6 stub hid it). Adding a permission would disable the extension on auto-update until accepted, so profiles now live in service-worker memory and the web re-pushes them on every ping (web -f). Live after reload: set/get/clear OK, unknown engine rejected.
+
+Gate state: Fact-check — verdict bug found and fixed (re-run pending); Manager — running; Meeting — pending. ChatGPT seat: the bridge preferred one of Nir's own ChatGPT tabs, which accepted the injection and never produced a readable answer (`timeout_no_new_response`); a fresh tab worked.
+
 # HIVE web 2026.10.16-c — failed engines explained in plain language (NOT DEPLOYED)
 
 Launch readiness §2. A Meeting card used to read "⚠ submit_not_confirmed" and a Manager worker card "timeout_no_new_response". Now: "<Engine> didn't answer: <what happened and what to do> [code]" via `explainEngineFailure` — closed tab, layout change (reopen; HIVE updates selectors remotely), timeout (bring the tab forward), empty answer (usually a usage limit), permission. The run still continues with the other engines, as before. Stance prompt hardened: "answer by reading, do not write code" (Gemini Flash-Lite answered with a Python script on 16.10). web.test.js ALL PASS; mirror synced. Carries -b (profile push).

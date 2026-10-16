@@ -27,8 +27,24 @@ const BUILTIN_IDS = Object.keys(ENGINES);
 // ask, never add. A site engine = { origin, name } in hiveSites + a host grant.
 const PROFILE_KEYS = ["input", "send", "stop", "ready", "response", "responseBody", "userTurn", "busy"];
 
+// No "storage" permission (and none will be added: a new permission disables
+// the extension on auto-update until accepted). Memory first; chrome.storage
+// only if present. The web app re-pushes profiles on every ping.
+const MEM = { hiveProfiles: null, hiveSites: null };
 async function storeGet(key, dflt) {
-  try { const o = await chrome.storage.local.get(key); return (o && o[key]) || dflt; } catch (e) { return dflt; }
+  if (MEM[key] != null) return MEM[key];
+  try {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      const o = await chrome.storage.local.get(key); if (o && o[key]) return o[key];
+    }
+  } catch (e) {}
+  return dflt;
+}
+async function storeSet(key, value) {
+  MEM[key] = value;
+  try {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) await chrome.storage.local.set({ [key]: value });
+  } catch (e) {}
 }
 async function getProfiles() { return await storeGet("hiveProfiles", {}); }
 async function profileFor(engineId) {
@@ -1413,9 +1429,9 @@ async function handleSetProfiles(msg) {
   const current = await getProfiles();
   const merged = Object.assign({}, current);
   for (const id of Object.keys(incoming)) merged[id] = incoming[id];
-  try { await chrome.storage.local.set({ hiveProfiles: merged }); }
-  catch (e) { return { ok: false, error: "storage: " + (e && e.message) }; }
-  return { ok: true, engines: Object.keys(incoming), keys: Object.fromEntries(Object.keys(incoming).map(id => [id, Object.keys(incoming[id].sel)])) };
+  await storeSet("hiveProfiles", merged);
+  return { ok: true, engines: Object.keys(incoming), persisted: !!(typeof chrome !== "undefined" && chrome.storage && chrome.storage.local),
+           keys: Object.fromEntries(Object.keys(incoming).map(id => [id, Object.keys(incoming[id].sel)])) };
 }
 async function handleGetProfiles() {
   return { ok: true, profiles: await getProfiles(), version: VERSION };

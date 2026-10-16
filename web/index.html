@@ -1099,7 +1099,7 @@ body.chatting .chat-container { display: flex; }
                 <button class="btn btn--secondary" id="btnAutoDetect" data-i18n="autoDetect">Auto-detect</button>
             </div>
         </details>
-        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.10.16-e</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
+        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.10.16-g</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
 
         <div style="margin-top:0.9rem;display:flex;align-items:center;gap:10px;">
             <label for="managerSelect" style="font-size:0.85rem;font-weight:600;white-space:nowrap;" data-i18n="managerPickLabel">Who runs the Manager?</label>
@@ -2055,13 +2055,13 @@ async function loadRemoteEngineConfig() {
 // once per page load after the bridge answers a ping; older bridges reply
 // "Unknown" and are ignored. This is the no-store-review path for a chat
 // site's DOM change: edit the json, deploy the web, every bridge picks it up.
-let remoteProfilesPushed = false;
+// Re-pushed on EVERY successful ping (not once): the bridge keeps profiles in
+// memory (no storage permission), and a restarted service worker must be
+// re-armed before the next run. One small message; harmless on old bridges.
 async function pushRemoteProfiles() {
-    if (remoteProfilesPushed) return;
     const profiles = REMOTE_ENGINE_CONFIG.profiles;
     if (!profiles || typeof profiles !== "object" || !Object.keys(profiles).length) return;
     if (!bridge.extensionId) return;
-    remoteProfilesPushed = true;
     try {
         const r = await bridge.send({ type: "HIVE:SET_PROFILES", profiles }, false);
         if (r && r.ok) console.log("[HIVE] selector profiles pushed:", r.keys);
@@ -5227,6 +5227,35 @@ function aggregatePOK(claim, parsed, transcript) {
          /^(none|no weakness|n\/a)/i.test((adversary.weakest_link || "").trim()))) {
         status = POK_STATUS.ESTABLISHED;
         reason = "Formal claim — adversary found no weakness; derivation from definitions is sufficient.";
+    }
+
+    // ── EVIDENCE-SET CONTRADICTIONS WEIGH (16.10.26, 3.6.7 live gate). ──
+    // The evidence seat is asked to mark each source supports / contradicts /
+    // partial, yet only the adversary's counters could lower a verdict: one
+    // supporting source among four independent contradicting ones read as
+    // "Likely true" (Great Wall from space). Independent contradicting
+    // sources now count the way independent supporting ones do.
+    const independentContradicting = sources.filter(s =>
+        s.independence === "independent" && s.supports_or_contradicts === "contradicts");
+    if (type !== POK_TYPE.CONTESTED_NORMATIVE && independentContradicting.length > 0 &&
+        status !== POK_STATUS.REFUTED && status !== POK_STATUS.DISPUTED) {
+        if (independentContradicting.length >= 2 && independentContradicting.length >= 2 * independentSupporting.length) {
+            status = POK_STATUS.REFUTED;
+            reason = `${independentContradicting.length} independent sources contradict the claim against ${independentSupporting.length} supporting.`;
+        } else {
+            status = POK_STATUS.DISPUTED;
+            reason = `Independent sources both support (${independentSupporting.length}) and contradict (${independentContradicting.length}) the claim.`;
+        }
+    }
+
+    // ── NO POSITIVE VERDICT WITHOUT THE CRITIC. ── When the adversary seat gave
+    // nothing (engine failed mid-run), "no strong counter" is absence of a
+    // critic, not absence of objections. Positive verdicts are withheld;
+    // evidence-based refuted/disputed stand.
+    const adversaryMissing = !(transcript && transcript.raw && transcript.raw.adversary);
+    if (adversaryMissing && (status === POK_STATUS.ESTABLISHED || status === POK_STATUS.WELL_SUPPORTED)) {
+        status = POK_STATUS.UNVERIFIABLE;
+        reason = "The adversary seat did not answer, so nothing argued against the claim — HIVE gives no positive verdict without its critic. Run the check again.";
     }
 
     let confidence = 0.0;
