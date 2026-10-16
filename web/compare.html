@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HIVE vs doing it yourself — one conversation across ChatGPT, Gemini and Claude</title>
+<meta name="description" content="What changes when ChatGPT, Gemini and Claude are in one conversation instead of three tabs: the work you stop doing, what side-by-side tools can't do, and what HIVE will not claim.">
+<link rel="canonical" href="https://hive-ny.pages.dev/compare">
+<meta name="robots" content="index, follow, max-snippet:-1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HIVE vs doing it yourself">
+<meta property="og:description" content="HIVE connects the AI assistants you already use - ChatGPT, Gemini, Claude - into one conversation. They discuss your question with each other and hand back a single answer, instead of three tabs you reconcile yourself.">
+<meta property="og:url" content="https://hive-ny.pages.dev/compare">
+<meta property="og:image" content="https://hive-ny.pages.dev/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"HIVE vs doing it yourself","description":"What changes when ChatGPT, Gemini and Claude are in one conversation instead of three tabs.","url":"https://hive-ny.pages.dev/compare","inLanguage":"en","author":{"@type":"Person","name":"Nir Yanushevsky"},"publisher":{"@type":"Organization","name":"HIVE by NY","url":"https://hive-ny.pages.dev/"},"about":{"@type":"SoftwareApplication","name":"HIVE","url":"https://hive-ny.pages.dev/","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}}
+</script>
+<style>
+  :root { --primary:#064C77; --bg:#F3F1EE; --text:#113645; --muted:#5b6b73; --card:#ffffff; --line:#dcd8d2; --ok:#1e7a4a; --warn:#9a6b00; }
+  @media (prefers-color-scheme: dark) { :root { --primary:#4db8e8; --bg:#0f1a20; --text:#e8eef1; --muted:#9fb0b8; --card:#17252d; --line:#2a3a44; --ok:#5fcf8f; --warn:#e2b64a; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font: 17px/1.6 -apple-system, "Segoe UI", Inter, Roboto, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+  header a { color: var(--primary); text-decoration: none; font-weight: 700; letter-spacing: .12em; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 18px 0 8px; }
+  h2 { font-size: 1.35rem; margin: 36px 0 10px; }
+  p.lead { font-size: 1.15rem; color: var(--muted); margin: 0 0 24px; }
+  blockquote { margin: 20px 0; padding: 14px 18px; border-left: 4px solid var(--primary); background: var(--card); border-radius: 6px; }
+  table { width:100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font-size: .95rem; }
+  th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+  th { background: rgba(6,76,119,.06); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  .ok { color: var(--ok); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; }
+  .cta { display:inline-block; margin: 28px 0 0; padding: 12px 20px; background: var(--primary); color:#fff; border-radius: 10px; text-decoration:none; font-weight: 600; }
+  .cta.secondary { background: transparent; color: var(--primary); border: 2px solid var(--primary); margin-left: 8px; }
+  footer { margin-top: 48px; font-size: .85rem; color: var(--muted); }
+  footer a { color: inherit; }
+  @media (max-width: 600px) { table, thead, tbody, tr, th, td { display:block; } thead { display:none; } td { border-bottom: 0; padding: 6px 12px; } td:first-child { font-weight: 600; padding-top: 12px; } tr { border-bottom: 1px solid var(--line); } .cta.secondary { margin-left:0; margin-top: 10px; } }
+</style>
+</head>
+<body>
+<main>
+<header><a href="/">HIVE</a></header>
+
+<h1>HIVE vs doing it yourself</h1>
+<p class="lead">You already pay for three AIs. They have never spoken to each other. Here is what changes when they do.</p>
+
+<blockquote>HIVE connects the AI assistants you already use - ChatGPT, Gemini, Claude - into one conversation. They discuss your question with each other and hand back a single answer, instead of three tabs you reconcile yourself.</blockquote>
+
+<h2>The work you are doing today</h2>
+<p>Ask the same question three times. Read three answers of different length and shape. Notice they disagree on one number. Paste answer B into tab A and ask "is this right?". Lose track of which one you trusted. Pick one, mostly by mood.</p>
+<p>That loop is integration work, and you are the integration layer. Every tool that shows AI answers side by side keeps you in that role: it saves the typing and leaves you the reconciling.</p>
+
+<h2>What one conversation changes</h2>
+<table>
+  <thead><tr><th></th><th>Three tabs, by hand</th><th>Side-by-side tools</th><th>HIVE</th></tr></thead>
+  <tbody>
+    <tr><td>Who reconciles the answers</td><td>You</td><td>You</td><td class="ok">They do - each one reads the others and responds</td></tr>
+    <tr><td>Disagreements</td><td>You notice them, sometimes</td><td>Shown, not resolved</td><td class="ok">Argued out; what stays contested is reported as contested</td></tr>
+    <tr><td>One of them assigned to attack the consensus</td><td>Only if you think to ask</td><td>No</td><td class="ok">Yes, every Meeting run</td></tr>
+    <tr><td>Accounts used</td><td>The ones you pay for</td><td>Usually new API keys, billed per call</td><td class="ok">The ones you pay for, in your own tabs</td></tr>
+    <tr><td>Where your question goes</td><td>To each provider</td><td>Through the tool's server</td><td class="ok">From your browser to the providers you chose; no server in between</td></tr>
+    <tr><td>Fact-checking a claim</td><td>Ask each one "is this true?"</td><td>Same, three times</td><td class="ok">Three roles - evidence, adversary, contradiction - and a verdict that is allowed to be "genuinely disputed"</td></tr>
+    <tr><td>Setup</td><td>None</td><td>Account + keys</td><td class="warn">A browser extension, desktop Chrome or Edge, and the three sites open</td></tr>
+    <tr><td>Speed</td><td>As fast as you type</td><td>Parallel calls</td><td class="warn">A Meeting runs in minutes, not seconds - they are actually talking</td></tr>
+  </tbody>
+</table>
+
+<h2>What HIVE will not claim</h2>
+<p>Three AIs agreeing is not three opinions. It is one opinion, repeated - they were trained on overlapping data, so their mistakes overlap too. HIVE reports agreement as agreement, never as truth, and that is why one of them is always assigned to argue against the position the others are converging on.</p>
+<p>HIVE does not make any single model smarter. It makes the three you have behave like a group that has to answer to each other.</p>
+
+<h2>Who this is for</h2>
+<p>People who already keep two or three assistants open and have caught one of them being confidently wrong. If one model has never let you down, you do not need this yet.</p>
+
+<a class="cta" href="/">Try HIVE</a>
+<a class="cta secondary" href="https://github.com/niryanush-svg/hive" rel="noopener">Read the source</a>
+
+<footer>
+  HIVE by NY · <a href="/privacy">Privacy</a> · <a href="https://hive.niryanush.workers.dev/">Encyclopedia</a> · <a href="https://github.com/niryanush-svg/hive" rel="noopener">GitHub</a>
+</footer>
+</main>
+</body>
+</html>
