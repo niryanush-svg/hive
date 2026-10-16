@@ -1480,6 +1480,20 @@ async function handlePoll({ engineId }) {
   return { status: result.status, error: result.error, engineId };
 }
 
+// 3.6.7: when an engine gives nothing, look for the provider's own limit
+// banner before blaming selectors. Runs in the tab, reads visible text only.
+function limitProbeFn(platform) {
+  const t = (document.body && document.body.innerText || "").slice(-4000);
+  const patterns = {
+    chatgpt: [/reached your (usage|message|plan) limit/i, /you've hit the .*limit/i, /upgrade to (continue|get more)/i, /try again (in|after) \d/i],
+    claude:  [/usage limit/i, /out of messages/i, /message limit reached/i, /limit resets/i],
+    gemini:  [/\u05D4\u05DE\u05DB\u05E1\u05D4 \u05E9\u05DC\u05DA/, /quota/i, /reached your limit/i, /limit resets/i]
+  };
+  const hits = (patterns[platform] || []).concat([/rate limit/i]);
+  for (const re of hits) { if (re.test(t)) return { limit: true, match: String(re).slice(0, 40) }; }
+  return { limit: false };
+}
+
 async function handleExtract({ engineId }) {
   const tab = await findEngineTab(engineId);
   if (!tab) return { error: "No tab", engineId };
@@ -1487,7 +1501,16 @@ async function handleExtract({ engineId }) {
   const result = await runInTab(tab.id, extractFn, [engineId, await profileFor(engineId)]);
   // Pass the error THROUGH instead of swallowing it — the orchestrator needs to
   // tell "engine gave an empty answer" apart from "selectors broke / no response".
-  if (!result || result.error) return { response: null, error: result?.error || "extract_failed", engineId };
+  if (!result || result.error) {
+    let error = result?.error || "extract_failed";
+    if (/timeout_no_new_response|no_new_response_element|empty_response_element|extract_failed/.test(error)) {
+      try {
+        const probe = await runInTab(tab.id, limitProbeFn, [engineId], 3000);
+        if (probe && probe.limit) error = "usage_limit";
+      } catch (e) {}
+    }
+    return { response: null, error, engineId };
+  }
   return { response: result.response, engineId };
 }
 

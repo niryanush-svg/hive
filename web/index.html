@@ -2525,7 +2525,7 @@ function explainEngineFailure(error) {
     if (/empty_response_element/i.test(e)) return "it returned an empty answer — usually a usage limit on that account; check the tab" + code;
     if (/no_new_response_element|not_our_turn|stale_response_element/i.test(e)) return "HIVE couldn't read a new answer from its page — reopen that tab and retry" + code;
     if (/permission_needed/i.test(e)) return "HIVE needs your permission for that site — open the HIVE icon and grant it" + code;
-    if (/quota|rate.?limit|usage limit/i.test(e)) return "it is out of quota for now — HIVE continued with the other AIs" + code;
+    if (/quota|rate.?limit|usage.?limit/i.test(e)) return "it is out of quota on that account for now — HIVE continued with the other AIs; check the tab or switch that engine to API mode in Settings" + code;
     return e ? "no answer (" + e.slice(0, 80) + ")" : "no answer";
 }
 

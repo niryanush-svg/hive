@@ -8,7 +8,8 @@ Launch readiness 3.1. 3.6.6 shipped only half of "the next site redesign is a we
 injectFn/pollFn/extractFn honour profile selectors via `sel(key)`, but the service worker
 never passed a profile (`args: [question, engineId]`) and had no message to receive one.
 
-## Extension (background.js, manifest 3.6.7, zip hive-bridge-3.6.7.zip sha256 60FD44DD…B45E, 30,459 bytes, same 9 members as 3.6.6)
+## Extension (background.js, manifest 3.6.7, zip hive-bridge-3.6.7.zip sha256 3D10AD78…D6AF, 30,872 bytes, same 9 members as 3.6.6 — rebuilt 16.10 15:30 with the usage-limit probe; the 60FD44DD build is superseded)
+- **Usage-limit probe** (readiness 2.1): when extractFn returns nothing (`timeout_no_new_response` / `no_new_response_element` / `empty_response_element`), `limitProbeFn` reads the tab's visible text for the provider's limit banner (ChatGPT, Claude, Gemini incl. the Hebrew quota notice) and the error becomes `usage_limit`. Web -e wording: "out of quota on that account for now — HIVE continued with the other AIs".
 - `HIVE:SET_PROFILES {profiles:{<engine>:{sel:{input,send,stop,ready,response,responseBody,userTurn,busy}}}}`
   → `sanitizeProfiles` (built-in ids only, PROFILE_KEYS only, strings ≤ 400 chars) → merged into
   `chrome.storage.local.hiveProfiles`. `HIVE:GET_PROFILES` returns them. Empty object clears an engine.
