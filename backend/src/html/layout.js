@@ -726,7 +726,7 @@ window.fetch = function(input, init) {
 
 <footer>
   <div class="wrap">
-    HIVE Encyclopedia · A multi-AI verified knowledge base, built on <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> · CC BY-SA 4.0
+    HIVE Encyclopedia · A multi-AI verified knowledge base, built on <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a> · CC BY-SA 4.0 · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener">Source on GitHub</a>
   </div>
 </footer>
 </body>

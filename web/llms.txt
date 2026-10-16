@@ -67,3 +67,5 @@ between independent models rather than a single authored narrative.
   including a local model through Ollama or LM Studio.
 - Models supported out of the box: ChatGPT, Gemini, Claude.
 - Made by Nir Yanushevsky.
+
+Source code (MIT): https://github.com/niryanush-svg/hive — extension, web app, encyclopedia worker and the regression suites.
