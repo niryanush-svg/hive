@@ -35,7 +35,9 @@ jobs:
           exit 1
 
       - name: Web app answers with a build stamp
-        run: curl -fsS --retry 3 --retry-delay 20 --max-time 30 https://hive-ny.pages.dev/ | grep -q 'id="buildStamp"'
+        run: |
+          curl -fsS --retry 3 --retry-delay 20 --max-time 30 -o page.html https://hive-ny.pages.dev/
+          grep -q 'id="buildStamp"' page.html
 
       - name: Remote engine config is valid JSON
         run: curl -fsS --retry 3 --retry-delay 20 --max-time 30 https://hive-ny.pages.dev/engine-config.json | python3 -m json.tool > /dev/null
