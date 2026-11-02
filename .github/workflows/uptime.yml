@@ -5,6 +5,11 @@ name: HIVE uptime
 on:
   schedule:
     - cron: "17 * * * *"
+  # Alert test: pushing a change to this one file fails the run on purpose, so
+  # the email path can be proven from the command line.
+  push:
+    paths:
+      - ".github/alert-test"
   workflow_dispatch:
     inputs:
       test_failure:
@@ -24,7 +29,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Forced failure (alert test only)
-        if: ${{ inputs.test_failure }}
+        if: ${{ github.event_name == 'push' || inputs.test_failure }}
         run: |
           echo "Test failure requested by hand. The alert email should arrive."
           exit 1
