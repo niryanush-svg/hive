@@ -1,0 +1,44 @@
+# Runs on GitHub, so it keeps watching when the PC and the Claude app are off.
+# A failed run makes GitHub email the account owner. No secrets, no user data.
+name: HIVE uptime
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+    inputs:
+      test_failure:
+        description: "Fail on purpose, to test that the alert email arrives"
+        type: boolean
+        default: false
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Forced failure (alert test only)
+        if: ${{ inputs.test_failure }}
+        run: |
+          echo "Test failure requested by hand. The alert email should arrive."
+          exit 1
+
+      - name: Web app answers with a build stamp
+        run: curl -fsS --retry 3 --retry-delay 20 --max-time 30 https://hive-ny.pages.dev/ | grep -q 'id="buildStamp"'
+
+      - name: Remote engine config is valid JSON
+        run: curl -fsS --retry 3 --retry-delay 20 --max-time 30 https://hive-ny.pages.dev/engine-config.json | python3 -m json.tool > /dev/null
+
+      - name: Encyclopedia home answers
+        run: curl -fsS --retry 3 --retry-delay 20 --max-time 30 -A "hive-uptime" -o /dev/null https://hive.niryanush.workers.dev/
+
+      - name: Encyclopedia API returns entries
+        run: |
+          curl -fsS --retry 3 --retry-delay 20 --max-time 30 -A "hive-uptime" "https://hive.niryanush.workers.dev/api/recent?limit=1" \
+            | python3 -c "import json,sys; assert json.load(sys.stdin).get('entries'), 'no entries'"

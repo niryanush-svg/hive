@@ -1099,7 +1099,7 @@ body.chatting .chat-container { display: flex; }
                 <button class="btn btn--secondary" id="btnAutoDetect" data-i18n="autoDetect">Auto-detect</button>
             </div>
         </details>
-        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.11.01-a</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
+        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.11.01-b</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
 
         <div style="margin-top:0.9rem;display:flex;align-items:center;gap:10px;">
             <label for="managerSelect" style="font-size:0.85rem;font-weight:600;white-space:nowrap;" data-i18n="managerPickLabel">Who runs the Manager?</label>
@@ -1326,7 +1326,7 @@ const I18N = {
         errEngineNoKey: "{name}: API mode is on but no key is saved — add one in Settings",
         errEngineDisabled: "{name}: paused by HIVE for now — {note}",
         reviewAskTitle: "Enjoying HIVE?",
-        reviewAskBody: "You have run 3 successful discussions — if HIVE is earning its place, a short store review helps more than you would think (and keeps it free).",
+        reviewAskBody: "You have run {n} successful discussions — if HIVE is earning its place, a short store review helps more than you would think (and keeps it free).",
         reviewAskCta: "Leave a quick review →",
         btnOpenEngines: "🪄 Open my AI tabs for me",
         lsTitle: "Connect your AIs",
@@ -1466,7 +1466,7 @@ const I18N = {
         errEngineNoKey: "{name}: \u05DE\u05E6\u05D1 API \u05E4\u05E2\u05D9\u05DC \u05D0\u05D1\u05DC \u05D0\u05D9\u05DF \u05DE\u05E4\u05EA\u05D7 \u05E9\u05DE\u05D5\u05E8 \u2014 \u05D4\u05D5\u05E1\u05E3 \u05D1\u05D4\u05D2\u05D3\u05E8\u05D5\u05EA",
         errEngineDisabled: "{name}: \u05DE\u05D5\u05E9\u05D4\u05D4 \u05D6\u05DE\u05E0\u05D9\u05EA \u05E2\u05DC \u05D9\u05D3\u05D9 HIVE \u2014 {note}",
         reviewAskTitle: "נהנה מ-HIVE?",
-        reviewAskBody: "השלמת 3 דיונים מוצלחים — אם HIVE מרוויחה את מקומה, ביקורת קצרה בחנות עוזרת יותר משנדמה (ושומרת עליה חינמית).",
+        reviewAskBody: "השלמת {n} דיונים מוצלחים — אם HIVE מרוויחה את מקומה, ביקורת קצרה בחנות עוזרת יותר משנדמה (ושומרת עליה חינמית).",
         reviewAskCta: "השאר ביקורת קצרה ←",
         btnOpenEngines: "🪄 פתח לי את הטאבים של הבינות",
         lsTitle: "חבר את הבינות שלך",
@@ -3090,20 +3090,28 @@ function trackEngineOutcome(id, res) {
 function maybeAskForReview() {
     try {
         if (turnHadTrouble) return;   // never ask right after a bad turn
-        if (localStorage.getItem("hive_review_asked") === "1") return;
+        if (localStorage.getItem("hive_review_clicked") === "1") return;
         const runs = (parseInt(localStorage.getItem("hive_success_runs") || "0", 10) || 0) + 1;
         localStorage.setItem("hive_success_runs", String(runs));
-        if (runs !== 3) return;
-        localStorage.setItem("hive_review_asked", "1");
+        // Ask at the 3rd good run, and once more at the 10th if they did not
+        // click: someone still here after ten runs is the likeliest to rate.
+        if (runs !== 3 && runs !== 10) return;
+        // An Edge user sent to the Chrome Web Store cannot rate there.
+        const reviewUrl = /\bEdg\//.test(navigator.userAgent)
+            ? "https://microsoftedge.microsoft.com/addons/detail/olaajmoajmalgofoimobiemgclanengb"
+            : "https://chromewebstore.google.com/detail/hive-bridge/ihlfiaencagdngolncjkbioknfmeolbl/reviews";
         const div = document.createElement("div");
         div.className = "msg";
         div.innerHTML = `
             <div class="msg-avatar msg-avatar--synthesis">🐝</div>
             <div class="msg-body"><div class="msg-bubble" dir="auto" style="background:var(--primary-faint,rgba(6,76,119,0.07));border:1px solid var(--border);">
                 <strong>${escapeHtml(t("reviewAskTitle"))}</strong><br>
-                <span style="font-size:0.85rem;">${escapeHtml(t("reviewAskBody"))}</span><br>
-                <a href="https://chromewebstore.google.com/detail/hive-bridge/ihlfiaencagdngolncjkbioknfmeolbl/reviews" target="_blank" rel="noopener" style="color:var(--primary);font-weight:700;">${escapeHtml(t("reviewAskCta"))}</a>
+                <span style="font-size:0.85rem;">${escapeHtml(t("reviewAskBody", { n: runs }))}</span><br>
+                <a href="${reviewUrl}" target="_blank" rel="noopener" style="color:var(--primary);font-weight:700;">${escapeHtml(t("reviewAskCta"))}</a>
             </div></div>`;
+        div.querySelector("a").addEventListener("click", () => {
+            try { localStorage.setItem("hive_review_clicked", "1"); } catch (e) {}
+        });
         $chatInner.appendChild(div);
         scrollToBottom();
     } catch (e) { /* never let the ask break the flow */ }
@@ -5615,6 +5623,8 @@ async function conductVerify(claim) {
     const record = await runVerify(claim);
     renderPOKRecord(record);
     try { await pokStore.save(record); } catch (e) { console.warn("[HIVE] pokStore.save failed:", e); }
+    const raw = (record && record.transcript && record.transcript.raw) || {};
+    if (raw.evidence && raw.adversary) maybeAskForReview();
     return record;
 }
 
