@@ -1099,7 +1099,7 @@ body.chatting .chat-container { display: flex; }
                 <button class="btn btn--secondary" id="btnAutoDetect" data-i18n="autoDetect">Auto-detect</button>
             </div>
         </details>
-        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.10.16-g</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
+        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.11.01-a</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
 
         <div style="margin-top:0.9rem;display:flex;align-items:center;gap:10px;">
             <label for="managerSelect" style="font-size:0.85rem;font-weight:600;white-space:nowrap;" data-i18n="managerPickLabel">Who runs the Manager?</label>
@@ -1687,10 +1687,43 @@ function scrubUiArtifacts(text) {
 }
 
 // ── Bridge ──
+// The ids HIVE Bridge is published under: Chrome Web Store, Edge Add-ons, and
+// the unpacked development build.
+const KNOWN_BRIDGE_IDS = ["ihlfiaencagdngolncjkbioknfmeolbl", "olaajmoajmalgofoimobiemgclanengb", "ibjkfocaifpcibnlfflkmnkoinciekej"];
+
 const bridge = {
     extensionId: localStorage.getItem("hive_ext_id") || null,
 
+    // Ask each published id for a PING; the first that answers is adopted and
+    // remembered. An id that is not installed fails immediately with lastError.
+    // Returns the id or null. Concurrent callers share one probe.
+    discover() {
+        if (this.extensionId) return Promise.resolve(this.extensionId);
+        if (this._discovering) return this._discovering;
+        this._discovering = (async () => {
+            if (typeof chrome === "undefined" || !chrome.runtime || !chrome.runtime.sendMessage) return null;
+            for (const id of KNOWN_BRIDGE_IDS) {
+                const reply = await new Promise(res => {
+                    try {
+                        chrome.runtime.sendMessage(id, { type: "HIVE:PING" }, r => {
+                            void chrome.runtime.lastError; // read it, or Chrome logs it as unchecked
+                            res(r || null);
+                        });
+                    } catch (e) { res(null); }
+                });
+                if (reply && reply.ok) {
+                    this.extensionId = id;
+                    try { localStorage.setItem("hive_ext_id", id); } catch (e) {}
+                    return id;
+                }
+            }
+            return null;
+        })().finally(() => { this._discovering = null; });
+        return this._discovering;
+    },
+
     async send(msg, rejectOnError) {
+        if (!this.extensionId) await this.discover();
         if (!this.extensionId) throw new Error("Extension not connected");
         if (typeof chrome === "undefined" || !chrome.runtime || !chrome.runtime.sendMessage) {
             throw new Error("Chrome extension API not available. Open this page in Chrome.");
@@ -1698,7 +1731,19 @@ const bridge = {
         return new Promise((resolve, reject) => {
             chrome.runtime.sendMessage(this.extensionId, msg, response => {
                 if (chrome.runtime.lastError) {
-                    reject(new Error(chrome.runtime.lastError.message));
+                    const why = chrome.runtime.lastError.message;
+                    // A remembered id that no longer exists (unpacked build
+                    // replaced by the store one): forget it, rediscover, retry once.
+                    if (/Receiving end does not exist/i.test(why) && !msg.__retried) {
+                        this.extensionId = null;
+                        try { localStorage.removeItem("hive_ext_id"); } catch (e) {}
+                        this.discover().then(id => {
+                            if (!id) return reject(new Error(why));
+                            this.send(Object.assign({}, msg, { __retried: true }), rejectOnError).then(resolve, reject);
+                        });
+                        return;
+                    }
+                    reject(new Error(why));
                 } else if (!response) {
                     reject(new Error("No response from extension"));
                 } else if (rejectOnError && response.error) {
@@ -4518,8 +4563,8 @@ async function autoDetect() {
     $connStatus.style.background = "var(--gray-100)";
     $connStatus.style.color = "var(--text-secondary)";
 
-    // Try known ID from localStorage first, then common patterns
-    const storedId = localStorage.getItem("hive_ext_id");
+    // Try known ID from localStorage first, then the ids HIVE Bridge is published under
+    const storedId = localStorage.getItem("hive_ext_id") || await bridge.discover();
     const candidates = storedId ? [storedId] : [];
 
     // No stored ID → the browser cannot guess the extension's ID. Don't pretend
@@ -6840,6 +6885,8 @@ window.HIVE = {
     stopNode() { return hiveNode.stop(); },
     async processOne() { return await hiveNode.processNext(); },
     nodeId() { return hiveNode.contributorId(); },
+    discoverBridge() { return bridge.discover(); },
+    bridgeId() { return bridge.extensionId; },
     remoteConfig() { return REMOTE_ENGINE_CONFIG; },
     engineDisabled(id) { return remoteEngineDisabled(id); },
     async requestEntry(qid) {
@@ -7479,6 +7526,14 @@ if (bridge.extensionId) {
     // 3.6.5: this is the path that actually connects on a normal load - it never
     // set bridgeVersion, so the version tooltip always read "Bridge not connected".
     bridge.ping().then(r => { bridgeVersion = (r && r.version) || null; renderVersionChip(); refreshEngineStatus(); }).catch(() => {});
+} else {
+    // No remembered id: a visitor who installed the extension and came here
+    // directly connects without touching the toolbar icon.
+    bridge.discover().then(id => {
+        if (!id) return;
+        $extIdInput.value = id;
+        return bridge.ping().then(r => { bridgeVersion = (r && r.version) || null; renderVersionChip(); refreshEngineStatus(); renderLandingSetup(); });
+    }).catch(() => {});
 }
 
 // ── Deep-link arrival (web 2026.10.11-a) ──
