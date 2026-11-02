@@ -1,3 +1,8 @@
+# Web 2026.11.01-i and worker, 2.11.26 (Nir deployed)
+
+- Encyclopedia merge pass retries on the next engine when the first answer is unusable. William Gibson fell to the lexical fallback (56 of 64 claims "single") because one engine returned no usable groups.
+- Google Search Console: both sites verified (web app by meta tag, encyclopedia by /google21b0e842ddcecc3d.html) and both sitemaps submitted on 2.11.26.
+
 # 3.6.7 submitted to both stores, 1.11.26 evening (web 2026.11.01-h, worker redeployed)
 
 Package hive-bridge-3.6.7.zip, sha 9831E66C...E453, 32,339 bytes, 11 members. Chrome: Nir pressed submit, status "pending review". Edge: Nir pressed Publish.

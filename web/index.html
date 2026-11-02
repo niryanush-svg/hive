@@ -2,6 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
+    <meta name="google-site-verification" content="S3MNzx90rLrsIiSjqkEhWNqto_JsQS8-mX-o5FtVkWY" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HIVE — All your AIs. One answer.</title>
@@ -1146,7 +1147,7 @@ body.panel .landing-icon, body.panel .landing h1, body.panel .tagline, body.pane
                 <button class="btn btn--secondary" id="btnAutoDetect" data-i18n="autoDetect">Auto-detect</button>
             </div>
         </details>
-        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.11.01-h</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
+        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.11.01-i</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
 
         <div style="margin-top:0.9rem;display:flex;align-items:center;gap:10px;">
             <label for="managerSelect" style="font-size:0.85rem;font-weight:600;white-space:nowrap;" data-i18n="managerPickLabel">Who runs the Manager?</label>
@@ -6409,13 +6410,17 @@ async function runEncyclopedia(topic, opts) {
         const claimCount = decomposed.reduce((n, e) => n + (e.atomic_claims || []).length, 0);
         let merged = null, mergeMethod = "lexical";
         if (claimCount >= 2) {
-            const mergerId = pickDecomposer(writers, validEntries.length);
-            try {
-                const mr = await engines.queryEngine(mergerId, buildEncyclopediaMergePrompt(topic, decomposed), false);
-                merged = applyMergeGroups(decomposed, extractJson(mr?.response));
-                if (merged) mergeMethod = "ai:" + mergerId;
-            } catch (e) {
-                console.log("[HIVE enc] merge pass threw:", e.message);
+            const firstMerger = pickDecomposer(writers, validEntries.length);
+            const secondMerger = pickDecomposer(writers, validEntries.length + 1);
+            for (const mergerId of (secondMerger && secondMerger !== firstMerger ? [firstMerger, secondMerger] : [firstMerger])) {
+                try {
+                    const mr = await engines.queryEngine(mergerId, buildEncyclopediaMergePrompt(topic, decomposed), false);
+                    merged = applyMergeGroups(decomposed, extractJson(mr?.response));
+                    if (merged) { mergeMethod = "ai:" + mergerId; break; }
+                    console.log(`[HIVE enc] merge pass unusable from ${mergerId}: ${String(mr?.response || "").replace(/\s+/g, " ").slice(0, 200)}`);
+                } catch (e) {
+                    console.log(`[HIVE enc] merge pass threw (${mergerId}):`, e.message);
+                }
             }
         }
         const toAggregate = merged || decomposed;

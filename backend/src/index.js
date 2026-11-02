@@ -150,6 +150,9 @@ export default {
             if (path === "/llms.txt") {
                 return llmsTxt();
             }
+            if (path === "/google21b0e842ddcecc3d.html") {
+                return new Response("google-site-verification: google21b0e842ddcecc3d.html", { headers: { "Content-Type": "text/html; charset=utf-8" } });
+            }
 
             // ── HTML pages (everything not /api/*) ──
             if (path === "/" || path === "") {
