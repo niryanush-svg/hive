@@ -525,11 +525,12 @@ details.audit summary:hover { color: var(--link); }
   <div class="wrap">
     <h1><a href="/">HIVE</a></h1>
     <nav>
-      <a href="/">Browse</a>
+      <a href="/browse">Browse</a>
       <a href="/about">About</a>
       <a href="/how-it-works">How it works</a>
       <a href="/contribute">Contribute</a>
       <a href="/me" id="navMe">My contributions</a>
+      <a href="https://hive-ny.pages.dev" target="_blank" rel="noopener"><strong>Get HIVE</strong></a>
     </nav>
   </div>
 </header>

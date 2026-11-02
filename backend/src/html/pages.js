@@ -46,6 +46,32 @@ function asSentence(t) {
 }
 
 // ── Homepage: search + recent entries ──
+const HIVE_APP_URL = "https://hive-ny.pages.dev";
+
+// A–Z of every entry that carries the per-claim agreement record.
+export async function browsePage(env) {
+    const all = await getRecentEntries(env.DB, 5000);
+    const stanced = all.filter(e => e.has_agreement);
+    const list = (stanced.length ? stanced : all).slice()
+        .sort((a, b) => String(a.canonical_label).localeCompare(String(b.canonical_label)));
+    const body = `
+<div class="claims-section">
+  <h2>All topics (${list.length})</h2>
+  <p style="color:var(--muted);">Don't see yours? <a href="/">Search for any topic</a> and request it.</p>
+  <ul class="recent-list">${list.map(e => `
+    <li>
+      <a href="/entry/${escapeHtml(e.wikidata_qid)}">${escapeHtml(e.canonical_label)}</a>
+      <span class="status-badge status-${escapeHtml(e.status)}">${escapeHtml(ENTRY_STATUS_LABEL[e.status] || e.status)}</span>
+    </li>`).join("")}</ul>
+</div>`;
+    return htmlResponse(layout({
+        title: "All topics — HIVE Encyclopedia",
+        body,
+        description: `${list.length} topics written by several independent AIs, with per-claim agreement shown.`,
+        canonical: "/browse"
+    }));
+}
+
 export async function homePage(env) {
     // Launch readiness 5.2: while the pre-13.10 entries are being rebuilt, the
     // front page shows only entries with a stance-verified summary. Falls back
@@ -53,6 +79,8 @@ export async function homePage(env) {
     const all = await getRecentEntries(env.DB, 60);
     const stanced = all.filter(e => e.has_agreement);
     const recent = (stanced.length ? stanced : all).slice(0, 20);
+    const allEntries = await getRecentEntries(env.DB, 5000);
+    const topicCount = allEntries.filter(e => e.has_agreement).length || allEntries.length;
     const recentHtml = recent.length === 0
         ? `<p class="empty-state">No verified entries yet. Be the first to contribute!</p>`
         : `<ul class="recent-list">${recent.map(e => `
@@ -65,11 +93,15 @@ export async function homePage(env) {
 
     const body = `
 <div class="mission-box">
-  <h2>Multi-AI verified, atomic, transparent.</h2>
+  <h2>An encyclopedia written by AIs that check each other.</h2>
   <p>
-    HIVE is an encyclopedia where every claim is verified by multiple independent AIs and rated by source quality.
-    Built on top of <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a>'s 122 million item identifiers.
-    Disputes preserved, not erased. Sources required for every challenge.
+    Several AI models write each entry independently. Every claim then shows which of them support it and which contradict it, so you can see where they agree and where they don't.
+    Agreement is reported as agreement, never as proof: the models share training data and can repeat the same mistake.
+    Topics follow <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a>'s identifiers, and sources are required for every challenge.
+  </p>
+  <p style="margin-bottom:0;">
+    <a href="/browse"><strong>Browse all ${topicCount} topics</strong></a> ·
+    <a href="${HIVE_APP_URL}" target="_blank" rel="noopener">Ask your own AIs with HIVE</a>
   </p>
 </div>
 
@@ -79,7 +111,7 @@ export async function homePage(env) {
 </form>
 
 <div class="claims-section">
-  <h2>Recently verified</h2>
+  <h2>Recently checked</h2>
   ${recentHtml}
 </div>
 `;
@@ -442,6 +474,10 @@ ${sectionsHtml}
   <p class="section-note">Every claim with the AIs that wrote or supported it, its independence grade, cited sources, and a Challenge button. ${meta.merge_method ? `Claims merged via ${escapeHtml(String(meta.merge_method))}` : ""}${meta.stance_method ? `, stances via ${escapeHtml(String(meta.stance_method))}` : ""}.</p>
   ${auditHtml || `<p class="empty-state">No atomic claims recorded yet.</p>`}
 </details>
+<p class="agreement-note" style="margin-top:24px;">
+  Want your own AIs to discuss this? HIVE connects the AI assistants you already use into one conversation.
+  <a href="${HIVE_APP_URL}/#q=${encodeURIComponent("What should I know about " + entry.canonical_label + "?")}&mode=meeting" target="_blank" rel="noopener">Ask yours about ${escapeHtml(entry.canonical_label)}</a>
+</p>
 </article>
 `;
     const description = lead ? lead.slice(0, 155).replace(/\s+\S*$/, "") + (lead.length > 155 ? "…" : "")
@@ -487,14 +523,14 @@ export function aboutPage() {
 <div class="mission-box">
   <h2>What we're building</h2>
   <p>
-    HIVE is an encyclopedia where every entry is verified by multiple independent AIs, and every claim is rated by the strength of its evidence — not by editorial fiat.
+    HIVE is an encyclopedia where several independent AIs write every entry, and every claim shows which of them support it, along with the evidence behind it. Agreement is a signal, not proof.
   </p>
 </div>
 
 <h2 style="font-family: var(--serif); font-size: 24px; margin: 32px 0 12px;">Method</h2>
 <ul style="padding-left: 24px; line-height: 1.8;">
   <li><strong>Atomic claims:</strong> Each entry is decomposed into discrete factual statements. Each gets its own status.</li>
-  <li><strong>Multi-AI quorum:</strong> 3 AIs write independently. Where they agree, the claim is established. Where they don't, the claim is contested and more AIs are recruited (up to 15).</li>
+  <li><strong>Multi-AI quorum:</strong> 3 AIs write independently. Where they agree, the claim is marked as agreed, and it takes independent sources to go further. Where they don't, the claim is shown as contested.</li>
   <li><strong>Diversity required:</strong> Each step adds a new diversity dimension — model family, geography, license, language ecosystem.</li>
   <li><strong>Source ladder:</strong> Sources are classified A–H by reliability. Challenges require citation above the bar of the claim's current status.</li>
   <li><strong>Dissent preserved:</strong> Minority views are never erased. The dissent log is part of the public record.</li>

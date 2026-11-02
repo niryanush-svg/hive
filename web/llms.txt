@@ -41,13 +41,15 @@ the difference between asking three strangers and asking three colleagues.
 ## Privacy
 
 Questions are processed in the browser and sent only to the AI providers the
-user chose. There is no analytics. The only data the developer ever receives is
-a bug report the user explicitly chooses to send.
+user chose. There is no analytics. HIVE receives data only when the user presses
+a button to send it: a bug report, or a fact contributed to the public
+encyclopedia.
 
 ## The encyclopedia
 
-Discussions between the models also build a public, continuously verified
-knowledge base, keyed on Wikidata IDs. Each entry records per-claim agreement
+The same models also write a public, continuously verified knowledge base,
+keyed on Wikidata IDs. A person's own questions never go into it unless they
+press Contribute on a fact. Each entry records per-claim agreement
 between independent models rather than a single authored narrative.
 
 - [HIVE Encyclopedia](https://hive.niryanush.workers.dev/): verified entries

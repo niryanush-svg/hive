@@ -1376,9 +1376,14 @@ function extractFn(platform, S) {
 }
 
 // ── CHECK LOGIN: Is the AI ready to receive input? ──
-function checkLoginFn(platform) {
+function checkLoginFn(platform, S) {
   if (platform === "chatgpt") {
-    return !!(document.querySelector('#prompt-textarea') || document.querySelector('form'));
+    // 3.6.7: any <form> used to pass, but signed out chatgpt.com serves a different
+    // shell (textarea#mobile-composer-prompt, /uc/ URLs, no message attributes) that
+    // HIVE can neither fill nor read: "All three connected", then "Input field not
+    // found". Ready now means a composer the inject step can actually find.
+    const composers = [S && S.input, '#prompt-textarea', '[data-testid="prompt-textarea"]', 'div[contenteditable="true"][id*="prompt"]', 'form .ProseMirror[contenteditable="true"]', 'form div[contenteditable="true"]'];
+    return composers.some(s => { if (!s) return false; try { return !!document.querySelector(s); } catch (e) { return false; } });
   }
   if (platform === "gemini") {
     // v3.3.4: Google ships composer variants (A/B, Workspace shells) — a signed-in
@@ -1448,8 +1453,9 @@ async function handleCheckEngines() {
     if (!tabs.length) return [id, { available: false, reason: "no_tab" }];
     // Wake the best candidate if Memory Saver froze it (common at first use).
     await ensureTabAwake(tabs[0].id);
+    const profile = await profileFor(id);
     for (const tab of tabs.slice(0, 3)) {
-      const r = await runInTab(tab.id, checkLoginFn, [id], 5000);
+      const r = await runInTab(tab.id, checkLoginFn, [id, profile], 5000);
       if (r && !r.error) {
         READY_TABS[id] = tab.id;
         return [id, { available: true, reason: "ready", tabId: tab.id }];
@@ -1458,7 +1464,7 @@ async function handleCheckEngines() {
     // The AI web apps mount their composer late; give the best candidate one
     // retry before declaring not_ready (avoids a spurious "need 3 engines").
     await new Promise(r => setTimeout(r, 700));
-    const retry = await runInTab(tabs[0].id, checkLoginFn, [id], 5000);
+    const retry = await runInTab(tabs[0].id, checkLoginFn, [id, profile], 5000);
     if (retry && !retry.error) {
       READY_TABS[id] = tabs[0].id;
       return [id, { available: true, reason: "ready", tabId: tabs[0].id }];

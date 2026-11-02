@@ -26,16 +26,16 @@
 <div class="wrap">
   <a class="back" href="/">← Back to HIVE</a>
   <h1>HIVE — Privacy Policy</h1>
-  <div class="sub">Last updated: 23 June 2026</div>
+  <div class="sub">Last updated: 1 November 2026</div>
 
-  <p>HIVE lets you ask one question across the AI assistants you already use (ChatGPT, Gemini, Claude) and get a single, cross‑checked answer. It is made of a web app (this site) and an optional Chrome extension ("HIVE Bridge"). This policy explains, in plain language, exactly what data is handled and where it goes.</p>
+  <p>HIVE connects the AI assistants you already use (ChatGPT, Gemini, Claude) into one conversation. It is made of a web app (this site) and a browser extension for Chrome and Edge ("HIVE Bridge"). This policy explains, in plain language, exactly what data is handled and where it goes.</p>
 
   <div class="tldr">
     <strong>The short version</strong>
     <ul>
       <li>Your questions and answers are processed <strong>in your browser</strong>. In normal use, no HIVE server sees them.</li>
       <li>HIVE has <strong>no passive analytics or tracking</strong>. We do not sell or share your data, and there are no ads.</li>
-      <li>The <strong>only</strong> time data reaches a HIVE server is a bug report <strong>you explicitly choose to send</strong>.</li>
+      <li>Data reaches a HIVE server <strong>only when you press a button to send it</strong>: a bug report, or a fact you contribute to the public Encyclopedia.</li>
       <li>If you use API mode, your API keys are stored <strong>only in your browser</strong> and are sent only to the AI provider — never to HIVE.</li>
     </ul>
   </div>
@@ -43,16 +43,17 @@
   <h2>1. Your questions and answers</h2>
   <p>When you ask HIVE a question, it is sent to whichever AI assistants you have connected, and the answers are combined in your browser. HIVE does not run a server that receives, stores, or logs your questions or answers during normal use.</p>
   <ul>
-    <li><strong>Scrape mode (default):</strong> the extension types your question into your <em>existing, logged‑in</em> ChatGPT / Gemini / Claude tabs and reads back the answer. Each provider receives and stores that text the same way it stores anything else you type there, under <em>their</em> privacy policy.</li>
-    <li><strong>API mode (bring your own key):</strong> your question goes directly from your browser to the AI provider using your own API key. Your keys live only in your browser's <code>localStorage</code> and are never transmitted to HIVE.</li>
-    <li><strong>Fan‑out:</strong> Panel and Conductor modes send your question to more than one provider in parallel. If a question is sensitive, use Single‑provider mode in Settings.</li>
+    <li><strong>Your tabs (default):</strong> the extension types your question into your <em>existing, signed-in</em> ChatGPT / Gemini / Claude tabs and reads back the answer. Each provider receives and stores that text the same way it stores anything else you type there, under <em>their</em> privacy policy.</li>
+    <li><strong>API mode (bring your own key):</strong> your question goes from your browser to the AI provider you configured, including any OpenAI-compatible endpoint you enter, using your own API key. Your keys live only in your browser's <code>localStorage</code> and are never transmitted to HIVE.</li>
+    <li><strong>Several providers at once:</strong> Meeting and Manager modes send your question to more than one provider. If a question is sensitive, use Single-provider mode in Settings.</li>
   </ul>
 
-  <h2>2. Bug reports (the one thing that reaches a HIVE server)</h2>
-  <p>If — and only if — you click <strong>"Report a problem"</strong> and choose to send it, HIVE transmits a diagnostic bundle to its server (<code>hive.niryanush.workers.dev</code>) so the developer can reproduce and fix the issue. That bundle contains: the note you type, your current question, the last few messages on screen, the page URL, your browser/user‑agent string, and an anonymous identifier. Nothing is sent unless you actively submit a report.</p>
+  <h2>2. Bug reports</h2>
+  <p>If — and only if — you click <strong>"Report a problem"</strong> and choose to send it, HIVE transmits a diagnostic bundle to its server (<code>hive.niryanush.workers.dev</code>) so the developer can reproduce and fix the issue. That bundle contains: the note you type, your current question, the last few messages on screen, the engines and mode in use, the app and extension versions, the language, the page URL, your browser/user-agent string, and an anonymous identifier. The engine self-test has its own "Send this result to the developer" button, which sends the test results, the page URL, your browser string and the same identifier. Nothing is sent unless you press one of these buttons.</p>
 
-  <h2>3. The optional Encyclopedia / contribution feature</h2>
-  <p>HIVE includes an opt‑in public‑knowledge feature. It is off by default and only runs if you explicitly turn it on. When enabled, it submits topic‑based encyclopedia content (never your personal files or private questions) to the HIVE backend, tagged with an anonymous contributor identifier. You can stop it at any time.</p>
+  <h2>3. The public Encyclopedia</h2>
+  <p>HIVE runs a public encyclopedia at <code>hive.niryanush.workers.dev</code>. Your questions never go into it on their own. A fact reaches it only when you press <strong>"Contribute to Encyclopedia"</strong> on a Fact-check result: HIVE then sends that claim, its verdict and its sources to the HIVE server, and <strong>publishes the claim and its sources publicly</strong>, so do not contribute anything private. Requesting a new topic on the encyclopedia site sends that topic.</p>
+  <p>These actions and bug reports carry an anonymous identifier stored in your browser. The server also computes a salted hash of your IP address, to limit abuse and, for contributions, to count one person as one voice. It does not store the IP address itself in these records.</p>
 
   <h2>4. What HIVE does <em>not</em> do</h2>
   <ul>
@@ -65,13 +66,14 @@
   <h2>5. Browser permissions and why</h2>
   <p>The HIVE Bridge extension requests only what it needs to do its single job — relay one question to your AI tabs and read the answers back:</p>
   <ul>
-    <li><strong>Host access</strong> to <code>chatgpt.com</code>, <code>chat.openai.com</code>, <code>gemini.google.com</code>, <code>claude.ai</code> — to type your question into those tabs and read the response.</li>
+    <li><strong>Host access</strong> to <code>chatgpt.com</code>, <code>chat.openai.com</code>, <code>gemini.google.com</code>, <code>claude.ai</code> — to type your question into those tabs, read the response, and notice when an assistant reports that you have reached its usage limit.</li>
     <li><strong>Tabs / scripting</strong> — to locate your open AI tabs and run the small relay script inside them.</li>
+    <li><strong>Optional access to other sites</strong> — not granted at install. Requested only if you click to enable a custom AI provider, and used only to reach the API endpoint you entered. You can revoke it at any time.</li>
   </ul>
-  <p>The extension communicates only with this web app (<code>hive-ny.pages.dev</code>) and never injects into or reads any other website.</p>
+  <p>The extension communicates only with this web app (<code>hive-ny.pages.dev</code>), your AI tabs and any API endpoint you entered, and it never injects into or reads any other website. The web app also loads a small configuration file from this site, which holds no data about you and lets HIVE adapt when a chat site changes its layout.</p>
 
   <h2>6. Data retention</h2>
-  <p>Bug reports you submit are retained only as long as needed to diagnose and fix issues. API keys and your preferences live in your browser and are removed when you clear the site's data or uninstall. To request deletion of a bug report you sent, contact us with the approximate time you submitted it.</p>
+  <p>Bug reports you submit are retained only as long as needed to diagnose and fix issues. Contributed facts stay public as part of the Encyclopedia. API keys and your preferences live in your browser and are removed when you clear the site's data. To request deletion of a bug report or removal of a fact you contributed, contact us with the approximate time you sent it.</p>
 
   <h2>7. Children</h2>
   <p>HIVE is not directed to children under 13 and does not knowingly collect data from them.</p>
@@ -83,7 +85,7 @@
   <p>Questions or requests: <a href="mailto:niryanush@gmail.com">niryanush@gmail.com</a>.</p>
 
   <footer>
-    HIVE by NY · This page is the privacy policy referenced by the HIVE Bridge Chrome extension and the HIVE web app.
+    HIVE by NY · This page is the privacy policy referenced by the HIVE Bridge browser extension and the HIVE web app.
   </footer>
 </div>
 </body>

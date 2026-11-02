@@ -22,7 +22,7 @@ import { handleModels } from "./routes/models.js";
 import { handleSubmitVote } from "./routes/submit-vote.js";
 import { handleReport } from "./routes/report.js";
 import { robotsTxt, sitemapXml, llmsTxt } from "./routes/seo.js";
-import { homePage, searchPage, entryPage, aboutPage, contributePage, mePage, howItWorksPage } from "./html/pages.js";
+import { homePage, browsePage, searchPage, entryPage, aboutPage, contributePage, mePage, howItWorksPage } from "./html/pages.js";
 
 const CORS_HEADERS = {
     "Access-Control-Allow-Origin": "*",
@@ -161,6 +161,9 @@ export default {
             if (path.startsWith("/entry/")) {
                 const qid = path.slice("/entry/".length).replace(/\/$/, "");
                 return await entryPage(qid, env);
+            }
+            if (path === "/browse") {
+                return await browsePage(env);
             }
             if (path === "/about") {
                 return aboutPage();

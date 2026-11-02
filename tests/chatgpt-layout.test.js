@@ -150,5 +150,23 @@ function check(name, cond, got) { console.log((cond ? "PASS" : "FAIL") + "  " + 
   check("C5 five stamped units, nothing new: poll streaming, extract refuses", po.status === "streaming" && ex && !ex.response, { po, ex });
 }
 
+// C6-C8 - the ready check against the 1.11.26 pages as probed live.
+{
+  const checkSrc = sliceFn("checkLoginFn");
+  const ready = (html, S) => {
+    const dom = new JSDOM(html);
+    const ctx = vm.createContext({ document: dom.window.document });
+    vm.runInContext(checkSrc, ctx);
+    ctx.__S = S || null;
+    return vm.runInContext('checkLoginFn("chatgpt", __S)', ctx);
+  };
+  const signedIn = "<form><div class='ProseMirror' contenteditable='true' aria-label='Ask ChatGPT'></div></form>";
+  const signedOut = "<form></form><form><textarea id='mobile-composer-prompt' aria-label='Chat with ChatGPT'></textarea><button aria-label='Send message'></button></form>";
+  check("C6 signed in composer: ready", ready(signedIn) === true);
+  check("C7 signed out shell with forms and a textarea: not ready", ready(signedOut) === false);
+  check("C8 a remote input selector can bring a new composer back", ready(signedOut, { input: "#mobile-composer-prompt" }) === true);
+  check("C8b a bad remote selector cannot throw", ready(signedIn, { input: "[[[" }) === true);
+}
+
 console.log(fails ? "\nFAILED " + fails : "\nALL PASS");
 process.exit(fails ? 1 : 0);

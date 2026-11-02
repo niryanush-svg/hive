@@ -36,11 +36,32 @@ async function refreshStatus() {
   }
 }
 
+function openFullTab() {
+  chrome.tabs.create({ url: WEB_APP_URL + "#hive_ext_id=" + chrome.runtime.id });
+  window.close();
+}
+
 document.getElementById("open-hive").addEventListener("click", (e) => {
   e.preventDefault();
-  const url = WEB_APP_URL + "#hive_ext_id=" + chrome.runtime.id;
-  chrome.tabs.create({ url });
+  openFullTab();
+});
+
+// A small window of its own: drag it anywhere, resize it, keep it beside any tab.
+document.getElementById("open-float").addEventListener("click", (e) => {
+  e.preventDefault();
+  chrome.windows.create({ url: WEB_APP_URL + "?panel=1#hive_ext_id=" + chrome.runtime.id, type: "popup", width: 460, height: 820 });
   window.close();
+});
+
+// sidePanel.open must run inside the click, so the window id is read beforehand.
+let currentWindowId = null;
+if (chrome.sidePanel && chrome.sidePanel.open) {
+  chrome.windows.getCurrent((w) => { currentWindowId = w && w.id; });
+}
+document.getElementById("open-panel").addEventListener("click", (e) => {
+  e.preventDefault();
+  if (!chrome.sidePanel || !chrome.sidePanel.open || currentWindowId == null) { openFullTab(); return; }
+  chrome.sidePanel.open({ windowId: currentWindowId }).then(() => window.close()).catch(openFullTab);
 });
 
 // ── "Connect any AI provider" — optional host-permission grant ──

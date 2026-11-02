@@ -15,6 +15,7 @@ export const SITE_ORIGIN = "https://hive.niryanush.workers.dev";
 // Static pages worth crawling, with a rough change cadence.
 const STATIC_PAGES = [
     { path: "/",             changefreq: "daily",   priority: "1.0" },
+    { path: "/browse",       changefreq: "daily",   priority: "0.9" },
     { path: "/about",        changefreq: "monthly", priority: "0.6" },
     { path: "/how-it-works", changefreq: "monthly", priority: "0.7" },
     { path: "/contribute",   changefreq: "monthly", priority: "0.5" }

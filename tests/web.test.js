@@ -333,6 +333,70 @@ async function sim({ id = "chatgpt", script, opts, question = "q" }) {
     eq("deeplink: share markdown without a question has no link line", SM({ question: "", answer: "x", mode: "panel", trust: null, engineNames: [] }).includes("Run it across"), false);
   }
 
+  // answer rendering (1.11.26): the raw text Gemini gave on a real Meeting run.
+  {
+    const c = vm.createContext({});
+    vm.runInContext(grabFn("escapeHtml") + grabFn("answerInline") + grabFn("answerLines") + grabFn("answerToHtml"), c);
+    const A = t => vm.runInContext("answerToHtml", c)(t);
+    eq("render: heading and lone list markers", A("### Key Factors:\n-\nRunway: keep cash.\n-\nHiring: stay flexible."),
+       '<strong class="answer-h">Key Factors:</strong>\n\u2022 Runway: keep cash.\n\u2022 Hiring: stay flexible.');
+    eq("render: blank line between marker and item", A("1.\n\nFirst item"), "1. First item");
+    eq("render: bold and code", A("A **bold** and `code` word"), "A <strong>bold</strong> and <code>code</code> word");
+    eq("render: dash bullet keeps its indent", A("  - nested"), "  \u2022 nested");
+    eq("render: rule dropped, blank runs collapsed", A("a\n\n\n---\n\nb"), "a\n\nb");
+    eq("render: a negative number is not a bullet", A("-5 degrees"), "-5 degrees");
+    eq("render: html stays escaped, also inside bold", A("<img src=x onerror=1> **<b>x</b>**"),
+       "&lt;img src=x onerror=1&gt; <strong>&lt;b&gt;x&lt;/b&gt;</strong>");
+    eq("render: a trailing lone marker disappears", A("done\n-"), "done");
+    eq("render: pipe table still a table", A("| a | b |\n|---|---|\n| **1** | 2 |").startsWith('<table class="answer-table"><thead><tr><th>a</th>'), true);
+  }
+
+  // Real-harm heads-up only on real stakes (1.11.26).
+  {
+    const c = vm.createContext({});
+    vm.runInContext(grabFn("hasSeriousHarm"), c);
+    const H = x => vm.runInContext("hasSeriousHarm", c)(x);
+    eq("harm: a myth is not harm", H({ harm_if_true: ["spreads a popular myth"], harm_if_false: ["none"] }), false);
+    eq("harm: template dots are not harm", H({ harm_if_true: ["..."] }), false);
+    eq("harm: health claim warns", H({ harm_if_false: ["people may skip medical care"] }), true);
+    eq("harm: Hebrew flag still warns", H({ harm_if_true: ["\u05E0\u05D6\u05E7"] }), true);
+    eq("harm: no flags", H({}), false);
+  }
+
+  // Page timestamps that come along with a scraped answer (1.11.26).
+  {
+    const c = vm.createContext({});
+    vm.runInContext(grabFn("scrubUiArtifacts"), c);
+    const S = x => vm.runInContext("scrubUiArtifacts", c)(x);
+    eq("scrub: just now at the end", S("Do not rent.\njust now"), "Do not rent.");
+    eq("scrub: minutes ago at the end", S("Do not rent.\n2 minutes ago\nCopy"), "Do not rent.");
+    eq("scrub: inside a sentence it stays", S("It happened just now in the test."), "It happened just now in the test.");
+  }
+
+  // Meeting: real names back in round 2, answer first in the consensus (1.11.26).
+  {
+    const c = vm.createContext({});
+    vm.runInContext('const ENGINE_NAMES = { claude: "Claude", chatgpt: "ChatGPT", gemini: "Gemini" }; const crosstalkLabels = {};' + grabFn("revealEngineLabels"), c);
+    vm.runInContext('crosstalkLabels.chatgpt = { gemini: "Engine B", claude: "Engine A" };', c);
+    const R = (x, id) => vm.runInContext("revealEngineLabels", c)(x, id);
+    eq("names: shorthand and possessive", R("AGREE: Engine B/A are right. Engine A's point stands.", "chatgpt"), "AGREE: Gemini/Claude are right. Claude's point stands.");
+    eq("names: plural with and", R("Engines A and B agree", "chatgpt"), "Claude and Gemini agree");
+    eq("names: a letter with no engine stays", R("Engine C said", "chatgpt"), "Engine C said");
+    eq("names: labels for this engine only", R("Engine B said so", "chatgpt"), "Gemini said so");
+    eq("names: no map, text unchanged", R("Engine B said so", "gemini"), "Engine B said so");
+    eq("names: no false hit inside a word", R("Engine Bay", "chatgpt"), "Engine Bay");
+    const d = vm.createContext({});
+    vm.runInContext(grabFn("escapeHtml") + grabFn("answerInline") + grabFn("answerLines") + grabFn("answerToHtml") + grabFn("consensusToHtml"), d);
+    const C = x => vm.runInContext("consensusToHtml", d)(x);
+    const sample = "Discussion: round one.\n\nPositions:\n- Claude: no office.\n\n\u2713 Agreed: no lease.\n\u26A0 Unresolved: days.\n\u2794 Answer: Do not rent.\nRevisit at 15 people.";
+    const out = C(sample);
+    eq("consensus: answer comes first and whole", out.startsWith('<div class="consensus-answer">\u2794 Answer: Do not rent.\nRevisit at 15 people.</div>'), true);
+    eq("consensus: answer appears once", out.split("Do not rent").length - 1, 1);
+    eq("consensus: labels are bold", out.includes("<strong>Discussion:</strong>") && out.includes("<strong>\u2713 Agreed:</strong>"), true);
+    eq("consensus: no answer line, plain render", C("Discussion: x"), "<strong>Discussion:</strong> x");
+    eq("consensus: Hebrew keeps its label", C("\u2794 \u05EA\u05E9\u05D5\u05D1\u05D4: \u05DC\u05D0").startsWith('<div class="consensus-answer">\u2794 \u05EA\u05E9\u05D5\u05D1\u05D4'), true);
+  }
+
   console.log(fails || parseFail ? "\nFAILED " + (fails + parseFail) : "\nALL PASS");
   process.exit(fails || parseFail ? 1 : 0);
 })();

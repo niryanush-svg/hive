@@ -1,3 +1,48 @@
+# 3.6.7 submitted to both stores, 1.11.26 evening (web 2026.11.01-h, worker redeployed)
+
+Package hive-bridge-3.6.7.zip, sha 9831E66C...E453, 32,339 bytes, 11 members. Chrome: Nir pressed submit, status "pending review". Edge: Nir pressed Publish.
+
+New in the package since the 8149A5C6 build:
+- Side panel (permission sidePanel, no install warning per Chrome's permission list), sidepanel.html + sidepanel.js: an iframe of the web app with ?panel=1. Live on the unpacked build: connects, enters chat when all engines are ready, a real Meeting ran in it.
+- Popup: "Open beside this tab" first, then floating window (chrome.windows.create type popup) and full tab.
+- Ready check: signed-out chatgpt.com serves another shell (textarea#mobile-composer-prompt, /uc/ URLs, no message attributes) that HIVE cannot fill or read. checkLoginFn used to pass on any form, so the page said "All three connected" and then failed with "Input field not found". Now ready means a composer the inject step can find. Unit-tested on both shapes; not seen live on a signed-out page after the fix.
+- Short description now the first canonical sentence.
+
+Web, found by looking at real runs:
+- Engine bubbles rendered raw "###", "**" and a lone "-" per list item. answerToHtml now handles them, for every bubble.
+- Round 2 labels: each engine got its own "Engine A/B" shuffle, so the same letter meant a different AI in each reply, for the reader and for the consensus writer. Real names go back as soon as a reply arrives, shorthand "Engine B/A" included.
+- Meeting: the answer was the last line of a long card; it now comes first. Section labels are bold.
+- CSS printed "u00B7 RESPONDING" on every round 2 card (\u is not a CSS escape).
+- Scraped "just now" is scrubbed. Harm heads-up only on real stakes: the Great Wall claim got "could cause real harm".
+- Narrow layout was cut off, phones included: two-row header under 1000px, one column under 620px. Tall modals scroll.
+- Keep on top: Document Picture-in-Picture from any top-level page, an iframe with ?panel=1. Works live; closes with the window that opened it; not available inside the side panel.
+- Privacy policy, FAQ, llms.txt and in-app list corrected (see the previous entry).
+
+Encyclopedia worker: /browse A to Z, topic count on the home page, "Get HIVE" in the nav, a prefilled "Ask yours about X" link on every entry, honest wording: agreement is a signal, not proof.
+
+Store assets, all from real runs: assets/store-3.6.7/ (discussion, answers, final answer, Fact-check, side panel), assets/store-3.6.7-promo/ (tile and marquee rewritten around "You already pay for three AIs. They have never spoken to each other.").
+
+# HIVE web 2026.11.01-c + rebuilt 3.6.7 package - store audit before submission
+
+The audit found the listing still sold the old framing and the privacy text was wrong.
+- Short description, EN and HE, now the first canonical sentence. It lives in the package, so hive-bridge-3.6.7.zip was rebuilt. The zip with sha 8149A5C6 is gone; use A7F85B0F (31,039 bytes).
+- Long description, EN and HE, rewritten, with the open source link: STORE-PASTE-3.6.7.md, also holding URLs and reviewer notes. SUBMISSION.md and EDGE-SUBMISSION.md now point to it.
+- Privacy. Policy, in-app privacy list, FAQ JSON-LD, llms.txt and the launch reply bank all said a bug report is the only data HIVE ever receives. The Contribute to Encyclopedia button sends and publishes a fact, the self-test has its own send button, and the server hashes the IP. Section 3 said "off by default", but the button is simply always offered on eligible results. All corrected. Policy also gained the optional host permission and the current mode names. Normal questions still reach no HIVE server: every send path was traced to a button, or to window.HIVE calls with no UI.
+- llms.txt implied that discussions feed the encyclopedia. They do not.
+- APP_VERSION 3.6.5 -> 3.6.7 (header chip, bug reports). Landing: gap between the Connect card and Start.
+- Web and extension suites pass.
+
+# HIVE web 2026.11.01-b — rating ask reaches everyone (NOT DEPLOYED) · faults reach the mailbox
+
+Rating ask (existed since 3.6.5, once, at the 3rd good run): Fact-check runs never counted because that branch returned early; Edge users were sent to the Chrome store, where they cannot rate; ignoring it once meant never again. Now Fact-check counts when its evidence and adversary seats both answered, the link follows the browser, and there is one more ask at the 10th good run unless they clicked. 11 checks PASS on the function cut from the real page.
+
+Fault email. Audit first: the morning brief did report the stuck routine (31.10, item 5), but site-down, encyclopedia failures and user reports reached nobody, and pushes can be dropped ("terminal active").
+- `.github/workflows/uptime.yml` (source tools/uptime.yml): hourly on GitHub, independent of the PC. Proven end to end: a forced failure at 01:06:07Z reached niryanush@gmail.com at 01:06:34Z, INBOX, category Updates, subject "[niryanush-svg/hive] Run failed: HIVE uptime". To repeat: change .github/alert-test in hive-repo and push. Scheduled workflows stop after 60 days without repo activity; GitHub warns first. A run on a schedule mails whoever last changed the cron line, not proven separately from the push test.
+- hive-routine: FAILURE EMAIL section. Entry FAIL, store ALERT, new user reports, and a 23:00 check that the morning brief run is healthy, each by send_message to Nir only, at most once a day per key. Not exercised yet.
+- User reports: plan counts new rows and files the text in test-results/REPORTS-INBOX.md. The unattended agent never sees the text: anyone on the internet can write it and the agent holds tools. Needs REPORT_KEY on the worker (Nir); until then the plan prints "REPORTS: unavailable".
+- secretary-morning-run: Stage D may no longer label or unsubscribe HIVE alerts (it treats automated notifications as Unwanted, then unsubscribes); Stage H reports a "Run failed" mail.
+- Caught by running the checks by hand before the first scheduled run: `curl | grep -q` exits 23 under GitHub's pipefail, which would have raised a false alarm every hour.
+
 # HIVE web 2026.11.01-a — the page discovers the bridge (NOT DEPLOYED)
 
 From 25.10 23:05 every encyclopedia firing failed with "Extension not connected" (ENC-LOG 125-131) while the unpacked 3.6.7 answered PING normally. The page knew the id only from localStorage or the popup's #hive_ext_id handoff, and localStorage for the site had lost it between 25.10 03:19 and 23:05 (cause unknown). A visitor who installs the extension and opens the site directly hits the same dead end, so this is also a first-run bug (readiness 1.1/1.3).
