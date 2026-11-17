@@ -397,6 +397,24 @@ async function sim({ id = "chatgpt", script, opts, question = "q" }) {
     eq("consensus: Hebrew keeps its label", C("\u2794 \u05EA\u05E9\u05D5\u05D1\u05D4: \u05DC\u05D0").startsWith('<div class="consensus-answer">\u2794 \u05EA\u05E9\u05D5\u05D1\u05D4'), true);
   }
 
+  // ── Fact-check verdict: a sourced refutation is not "disputed" because the critic named an alternative (17.11.26 live run) ──
+  {
+    const grabFrozen = n => { const i = html.indexOf("\nconst " + n + " = Object.freeze({"); return html.slice(i, html.indexOf("\n});", i) + 4); };
+    const p = vm.createContext({ Object, Array, String, RegExp, JSON, Math, Date });
+    vm.runInContext(grabConst("POK_SCHEMA_VERSION") + grabFrozen("POK_TYPE") + grabFrozen("POK_STATUS") + grabFn("aggregatePOK"), p);
+    const AGG = (parsed) => vm.runInContext("aggregatePOK", p)("claim", parsed, { raw: { adversary: "x" } }).status;
+    const src = (n, side) => Array.from({ length: n }, (_, i) => ({ label: "s" + i, independence: "independent", supports_or_contradicts: side }));
+    const strong = [{ strength: "strong" }, { strength: "strong" }];
+    eq("pok: 7 independent against, critic names an alternative -> refuted",
+      AGG({ evidence: { type: "empirical", sources: src(7, "contradicts") }, adversary: { counter_evidence: strong, alternatives: ["100 C holds at sea level"] } }), "refuted");
+    eq("pok: one source against, critic names an alternative -> disputed",
+      AGG({ evidence: { type: "empirical", sources: src(1, "contradicts") }, adversary: { counter_evidence: strong, alternatives: ["another reading"] } }), "disputed");
+    eq("pok: support and strong counters -> disputed",
+      AGG({ evidence: { type: "empirical", sources: src(2, "supports") }, adversary: { counter_evidence: strong, alternatives: [] } }), "disputed");
+    eq("pok: 3 independent for, no counters -> established",
+      AGG({ evidence: { type: "empirical", sources: src(3, "supports") }, adversary: { counter_evidence: [], alternatives: [] } }), "established");
+  }
+
   console.log(fails || parseFail ? "\nFAILED " + (fails + parseFail) : "\nALL PASS");
   process.exit(fails || parseFail ? 1 : 0);
 })();

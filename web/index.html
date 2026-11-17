@@ -1147,7 +1147,7 @@ body.panel .landing-icon, body.panel .landing h1, body.panel .tagline, body.pane
                 <button class="btn btn--secondary" id="btnAutoDetect" data-i18n="autoDetect">Auto-detect</button>
             </div>
         </details>
-        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.11.01-i</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
+        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.11.17-a</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
 
         <div style="margin-top:0.9rem;display:flex;align-items:center;gap:10px;">
             <label for="managerSelect" style="font-size:0.85rem;font-weight:600;white-space:nowrap;" data-i18n="managerPickLabel">Who runs the Manager?</label>
@@ -5402,8 +5402,15 @@ function aggregatePOK(claim, parsed, transcript) {
     }
     // Strong, credible arguments on MORE THAN ONE side → preserve as disputed; never
     // hand down a one-sided confident verdict on a live dispute.
+    // (17.11.26) A refutation resting on two or more independent contradicting
+    // sources stands: the adversary's "alternatives" explain why people believe
+    // the claim, they are not a second side. Everest boiling point, 7 sources
+    // against and none for, read as "Genuinely disputed".
+    const sourcedRefutation = sources.filter(s =>
+        s.independence === "independent" && s.supports_or_contradicts === "contradicts").length >= 2;
     if ((status === POK_STATUS.REFUTED || status === POK_STATUS.ESTABLISHED) &&
-        strongCounters.length > 0 && (adversary.alternatives || []).length > 0) {
+        strongCounters.length > 0 && (adversary.alternatives || []).length > 0 &&
+        !(status === POK_STATUS.REFUTED && sourcedRefutation)) {
         status = POK_STATUS.DISPUTED;
         reason = "Strong, credible positions exist on more than one side — preserved as disputed, no single verdict.";
     }

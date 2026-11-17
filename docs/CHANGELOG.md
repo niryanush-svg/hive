@@ -1,3 +1,7 @@
+# Web 2026.11.17-a, 17.11.26 (Nir deployed; verified live)
+
+- Fact-check verdict: a refutation resting on two or more independent contradicting sources is no longer turned into "Genuinely disputed" because the critic listed an alternative explanation. Live run 17.11: "Water boils at 100 C at the summit of Everest", 7 independent sources contradicting, none supporting, 4 strong counters, verdict shown "Genuinely disputed, low". The guard that preserves live disputes now applies to a refutation only when it is thinly sourced. Four unit tests on the real aggregatePOK. Live re-run after deploy: same claim, "Likely false", high, 7 sources.
+
 # Web 2026.11.01-i and worker, 2.11.26 (Nir deployed)
 
 - Encyclopedia merge pass retries on the next engine when the first answer is unusable. William Gibson fell to the lexical fallback (56 of 64 claims "single") because one engine returned no usable groups.
