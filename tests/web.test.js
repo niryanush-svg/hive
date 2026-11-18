@@ -415,6 +415,37 @@ async function sim({ id = "chatgpt", script, opts, question = "q" }) {
       AGG({ evidence: { type: "empirical", sources: src(3, "supports") }, adversary: { counter_evidence: [], alternatives: [] } }), "established");
   }
 
+  // ── WhatsApp share text + store-rating schedule (web 2026.11.17-b) ──
+  {
+    const grabObj = n => { const i = html.indexOf("\nconst " + n + " = {"); if (i < 0) throw new Error("no obj " + n); return html.slice(i, html.indexOf("\n};", i) + 3); };
+    const sh = vm.createContext({ Object, Array, String, RegExp, JSON, Math, encodeURIComponent });
+    vm.runInContext(grabObj("I18N") + "\nlet currentLang = 'en';\nfunction __lang(l) { currentLang = l; }\n" + grabFn("t") +
+      grabConst("DEEP_LINK_ORIGIN") + grabConst("DEEP_LINK_MODES") + grabConst("DEEP_LINK_MAX_Q") + grabFn("modeToDeepLink") + grabFn("buildDeepLink") +
+      grabFn("pokVerdict") + grabFn("pokSureWord") + grabFn("clipShareText") + grabFn("toWhatsAppText") + grabFn("buildShareShort") +
+      grabFn("buildFactShare") + grabFn("reviewAskDue"), sh);
+    const F = n => vm.runInContext(n, sh);
+    eq("wa: markdown flattened for WhatsApp", F("toWhatsAppText")("## Title\n**bold** and `code`\n\n\n\nend"), "Title\n*bold* and code\n\nend");
+    const clipped = F("clipShareText")("word ".repeat(300), 700);
+    eq("wa: long text clipped on a word with an ellipsis", clipped.length <= 701 && clipped.endsWith("…") && !clipped.includes("wor…"), true);
+    const short = F("buildShareShort")({ question: "Is X true?", answer: "**Yes.** Because.", mode: "conductor", trust: { agreement: "high" }, engineNames: ["ChatGPT", "Gemini", "Claude"] });
+    eq("wa: answer share text", short, "*Is X true?*\n\n*Yes.* Because.\n\n✓ Full agreement between ChatGPT, Gemini, Claude\n\nRun this question across your own AIs:\nhttps://hive-ny.pages.dev/#q=Is%20X%20true%3F&mode=manager");
+    F("__lang")("he");
+    const longHe = F("buildShareShort")({ question: "שאלה ".repeat(80), answer: "תשובה ".repeat(800), mode: "panel", trust: { agreement: "split" }, engineNames: [] });
+    eq("wa: Hebrew share link stays under 8000 characters", ("https://wa.me/?text=" + encodeURIComponent(longHe)).length < 8000, true);
+    eq("wa: Hebrew split line with no engine names", longHe.includes("המודלים חלוקים: המודלים"), true);
+    F("__lang")("en");
+    const rec = { claim: "Water boils at 100 C on Everest", restated_claim: "Water boils at 100 C at the summit of Everest.", type: "empirical", status: "refuted", confidence: 0.9, sources: Array.from({ length: 7 }, () => ({})) };
+    eq("wa: fact-check share text", F("buildFactShare")(rec), "HIVE fact-check:\n“Water boils at 100 C at the summit of Everest.”\n\n❌ *Likely false*\nConfidence: high · 7 sources\n\nCheck a claim of your own:\nhttps://hive-ny.pages.dev/#q=Water%20boils%20at%20100%20C%20on%20Everest&mode=factcheck");
+    F("__lang")("he");
+    const heFact = F("buildFactShare")(rec);
+    eq("wa: Hebrew fact-check verdict and confidence", heFact.includes("*כנראה לא נכון*") && heFact.includes("רמת ביטחון: גבוהה · 7 מקורות"), true);
+    const opinion = F("buildFactShare")({ claim: "c", type: "contested-normative", status: "disputed", confidence: 0.35, sources: [] });
+    eq("wa: opinion verdict has no confidence line", opinion.includes("עניין של דעה") && !opinion.includes("רמת ביטחון"), true);
+    F("__lang")("en");
+    eq("rating ask: runs 5 and 15 only", Array.from({ length: 30 }, (_, i) => i + 1).filter(F("reviewAskDue")), [5, 15]);
+    eq("no stray Hebrew vowel marks in the page", (html.match(/ּ/g) || []).length, 0);
+  }
+
   console.log(fails || parseFail ? "\nFAILED " + (fails + parseFail) : "\nALL PASS");
   process.exit(fails || parseFail ? 1 : 0);
 })();

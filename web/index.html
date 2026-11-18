@@ -569,6 +569,15 @@ body.chatting .chat-container { display: flex; }
     font-family: var(--font); cursor: pointer; transition: all var(--transition);
 }
 .synthesis-actions button:hover { color: var(--primary); border-color: var(--primary); }
+.synthesis-actions button.btn-wa { color: #128C7E; border-color: rgba(18,140,126,.45); }
+.synthesis-actions button.btn-wa:hover { color: #fff; background: #128C7E; border-color: #128C7E; }
+.review-ask-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.review-ask-actions a, .review-ask-actions button { font-family: var(--font); font-size: 0.8rem; border-radius: 8px; padding: 5px 12px; cursor: pointer; text-decoration: none; line-height: 1.4; }
+.review-ask-rate { background: var(--primary); color: var(--surface); border: 1px solid var(--primary); font-weight: 700; }
+.review-ask-invite { background: transparent; color: #128C7E; border: 1px solid rgba(18,140,126,.45); }
+.review-ask-never { background: none; border: none; color: var(--text-secondary); text-decoration: underline; padding: 5px 4px; }
+[data-theme="dark"] .synthesis-actions button.btn-wa, [data-theme="dark"] .review-ask-invite { color: #25D366; border-color: rgba(37,211,102,.45); }
+[data-theme="dark"] .synthesis-actions button.btn-wa:hover { color: #08222e; background: #25D366; border-color: #25D366; }
 .consensus-answer {
     font-weight: 600; padding: 0.6rem 0.8rem; margin-bottom: 0.75rem; border-radius: 8px;
     background: var(--surface); border-inline-start: 3px solid var(--primary);
@@ -1147,7 +1156,7 @@ body.panel .landing-icon, body.panel .landing h1, body.panel .tagline, body.pane
                 <button class="btn btn--secondary" id="btnAutoDetect" data-i18n="autoDetect">Auto-detect</button>
             </div>
         </details>
-        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.11.17-a</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
+        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.11.17-b</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
 
         <div style="margin-top:0.9rem;display:flex;align-items:center;gap:10px;">
             <label for="managerSelect" style="font-size:0.85rem;font-weight:600;white-space:nowrap;" data-i18n="managerPickLabel">Who runs the Manager?</label>
@@ -1375,9 +1384,12 @@ const I18N = {
         errEngineNotReady: "{name}: tab is open but not signed in (or still loading) — finish signing in, then ask again",
         errEngineNoKey: "{name}: API mode is on but no key is saved — add one in Settings",
         errEngineDisabled: "{name}: paused by HIVE for now — {note}",
-        reviewAskTitle: "Enjoying HIVE?",
-        reviewAskBody: "You have run {n} successful discussions — if HIVE is earning its place, a short store review helps more than you would think (and keeps it free).",
-        reviewAskCta: "Leave a quick review →",
+        reviewAskTitle: "Is HIVE useful to you?",
+        reviewAskBody: "That was your {n}th good run. If HIVE is earning its place, a rating in the store is how other people find it.",
+        reviewAskCta: "Rate HIVE in the store",
+        reviewInvite: "Send HIVE to a friend",
+        reviewNever: "Don't ask again",
+        inviteText: "Worth a look: HIVE puts ChatGPT, Gemini and Claude in one conversation. They check each other and hand back one answer. Free, and it runs in your own browser tabs:",
         btnOpenEngines: "🪄 Open my AI tabs for me",
         lsTitle: "Connect your AIs",
         lsSub: "HIVE asks the AI tabs you are already signed into. Open them once and you are set.",
@@ -1410,6 +1422,17 @@ const I18N = {
         shareFailed: "Couldn't copy \u2014 select the text manually",
         linkCopied: "Link copied \u2014 whoever opens it gets this question, ready to run",
         linkUnavailable: "No link for this card",
+        shareRunOwn: "Run this question across your own AIs:",
+        shareTheAIs: "the AIs",
+        shareAgreeHigh: "\u2713 Full agreement between {names}",
+        shareAgreePartial: "Partial agreement between {names}",
+        shareAgreeSplit: "The AIs disagreed: {names}",
+        shareFactTitle: "HIVE fact-check:",
+        shareFactSure: "Confidence: {sure} \u00B7 {n} sources",
+        shareFactCta: "Check a claim of your own:",
+        sureHigh: "high",
+        sureMedium: "medium",
+        sureLow: "low",
         deepLinkReady: "Shared question loaded \u2014 press Send to run it across your AIs",
         deepLinkNoBridge: "Shared question loaded \u2014 install HIVE Bridge to run it across your AIs",
         busyWait: "HIVE is busy — wait for the current run to finish",
@@ -1517,9 +1540,12 @@ const I18N = {
         errEngineNotReady: "{name}: \u05D4\u05D8\u05D0\u05D1 \u05E4\u05EA\u05D5\u05D7 \u05D0\u05D1\u05DC \u05DC\u05D0 \u05DE\u05D7\u05D5\u05D1\u05E8 (\u05D0\u05D5 \u05E2\u05D3\u05D9\u05D9\u05DF \u05E0\u05D8\u05E2\u05DF) \u2014 \u05D4\u05E9\u05DC\u05DD \u05D4\u05EA\u05D7\u05D1\u05E8\u05D5\u05EA \u05D5\u05E0\u05E1\u05D4 \u05E9\u05D5\u05D1",
         errEngineNoKey: "{name}: \u05DE\u05E6\u05D1 API \u05E4\u05E2\u05D9\u05DC \u05D0\u05D1\u05DC \u05D0\u05D9\u05DF \u05DE\u05E4\u05EA\u05D7 \u05E9\u05DE\u05D5\u05E8 \u2014 \u05D4\u05D5\u05E1\u05E3 \u05D1\u05D4\u05D2\u05D3\u05E8\u05D5\u05EA",
         errEngineDisabled: "{name}: \u05DE\u05D5\u05E9\u05D4\u05D4 \u05D6\u05DE\u05E0\u05D9\u05EA \u05E2\u05DC \u05D9\u05D3\u05D9 HIVE \u2014 {note}",
-        reviewAskTitle: "נהנה מ-HIVE?",
-        reviewAskBody: "השלמת {n} דיונים מוצלחים — אם HIVE מרוויחה את מקומה, ביקורת קצרה בחנות עוזרת יותר משנדמה (ושומרת עליה חינמית).",
-        reviewAskCta: "השאר ביקורת קצרה ←",
+        reviewAskTitle: "האם HIVE עוזר לך?",
+        reviewAskBody: "זו הייתה הריצה המוצלחת ה־{n} שלך. אם HIVE מועיל לך, דירוג בחנות הוא הדרך שבה אחרים מוצאים אותו.",
+        reviewAskCta: "לדרג את HIVE בחנות",
+        reviewInvite: "לשלוח את HIVE לחבר",
+        reviewNever: "לא לשאול שוב",
+        inviteText: "שווה להכיר: HIVE מחבר את ChatGPT, Gemini ו־Claude לשיחה אחת. הם בודקים זה את זה ומחזירים תשובה אחת. חינם, ועובד בלשוניות שלך בדפדפן:",
         btnOpenEngines: "🪄 פתח לי את הטאבים של הבינות",
         lsTitle: "חבר את הבינות שלך",
         lsSub: "HIVE פונה לטאבים שאתה כבר מחובר בהם. פתח אותם פעם אחת וזהו.",
@@ -1552,6 +1578,24 @@ const I18N = {
         shareFailed: "ההעתקה נכשלה — סמן את הטקסט ידנית",
         linkCopied: "הקישור הועתק — מי שיפתח אותו יקבל את השאלה מוכנה להרצה",
         linkUnavailable: "אין קישור לכרטיס הזה",
+        shareRunOwn: "להריץ את השאלה הזו על הבינות המלאכותיות שלך:",
+        shareTheAIs: "המודלים",
+        shareAgreeHigh: "\u2713 הסכמה מלאה בין {names}",
+        shareAgreePartial: "הסכמה חלקית בין {names}",
+        shareAgreeSplit: "המודלים חלוקים: {names}",
+        shareFactTitle: "בדיקת עובדות של HIVE:",
+        shareFactSure: "רמת ביטחון: {sure} \u00B7 {n} מקורות",
+        shareFactCta: "לבדוק טענה משלך:",
+        sureHigh: "גבוהה",
+        sureMedium: "בינונית",
+        sureLow: "נמוכה",
+        vShare_established: "מבוסס היטב",
+        vShare_wellsupported: "כנראה נכון",
+        vShare_selfattested: "נתמך רק בדברי הנוגע בדבר",
+        vShare_disputed: "שנוי במחלוקת",
+        vShare_refuted: "כנראה לא נכון",
+        vShare_unverifiable: "אי אפשר לאמת",
+        vShare_normative: "עניין של דעה",
         deepLinkReady: "השאלה המשותפת נטענה — לחץ שלח כדי להריץ אותה על הבינות שלך",
         deepLinkNoBridge: "השאלה המשותפת נטענה — התקן את HIVE Bridge כדי להריץ אותה",
         busyWait: "HIVE עסוק — המתן לסיום הריצה הנוכחית",
@@ -3170,33 +3214,46 @@ function trackEngineOutcome(id, res) {
     }
 }
 
-// Ask for a store review ONCE, after the 3rd successful run — the moment the
-// user has felt real value. Store ranking weights ratings heavily; a gentle,
-// dismissible, one-time ask is the highest-leverage growth surface we own.
+// Store-rating ask (per Nir, 17.11.26): after the 5th successful run, and once
+// more at the 15th unless the user rated or chose "don't ask again". Store
+// ranking weights ratings heavily; this card is the growth surface HIVE owns.
+// It never offers anything in return and never asks for a particular score
+// (store policy). The same card offers sending HIVE to a friend on WhatsApp.
+function reviewAskDue(runs) { return runs === 5 || runs === 15; }
 function maybeAskForReview() {
     try {
         if (turnHadTrouble) return;   // never ask right after a bad turn
-        if (localStorage.getItem("hive_review_clicked") === "1") return;
         const runs = (parseInt(localStorage.getItem("hive_success_runs") || "0", 10) || 0) + 1;
         localStorage.setItem("hive_success_runs", String(runs));
-        // Ask at the 3rd good run, and once more at the 10th if they did not
-        // click: someone still here after ten runs is the likeliest to rate.
-        if (runs !== 3 && runs !== 10) return;
+        if (localStorage.getItem("hive_review_clicked") === "1") return;
+        if (localStorage.getItem("hive_review_never") === "1") return;
+        if (!reviewAskDue(runs)) return;
         // An Edge user sent to the Chrome Web Store cannot rate there.
         const reviewUrl = /\bEdg\//.test(navigator.userAgent)
             ? "https://microsoftedge.microsoft.com/addons/detail/olaajmoajmalgofoimobiemgclanengb"
             : "https://chromewebstore.google.com/detail/hive-bridge/ihlfiaencagdngolncjkbioknfmeolbl/reviews";
         const div = document.createElement("div");
-        div.className = "msg";
+        div.className = "msg msg--review-ask";
         div.innerHTML = `
             <div class="msg-avatar msg-avatar--synthesis">🐝</div>
             <div class="msg-body"><div class="msg-bubble" dir="auto" style="white-space:normal;background:var(--primary-faint,rgba(6,76,119,0.07));border:1px solid var(--border);">
                 <strong>${escapeHtml(t("reviewAskTitle"))}</strong><br>
-                <span style="font-size:0.85rem;">${escapeHtml(t("reviewAskBody", { n: runs }))}</span><br>
-                <a href="${reviewUrl}" target="_blank" rel="noopener" style="color:var(--primary);font-weight:700;">${escapeHtml(t("reviewAskCta"))}</a>
+                <span style="font-size:0.85rem;">${escapeHtml(t("reviewAskBody", { n: runs }))}</span>
+                <div class="review-ask-actions">
+                    <a class="review-ask-rate" href="${reviewUrl}" target="_blank" rel="noopener">${escapeHtml(t("reviewAskCta"))}</a>
+                    <button type="button" class="review-ask-invite">${escapeHtml(t("reviewInvite"))}</button>
+                    <button type="button" class="review-ask-never">${escapeHtml(t("reviewNever"))}</button>
+                </div>
             </div></div>`;
-        div.querySelector("a").addEventListener("click", () => {
+        div.querySelector(".review-ask-rate").addEventListener("click", () => {
             try { localStorage.setItem("hive_review_clicked", "1"); } catch (e) {}
+        });
+        div.querySelector(".review-ask-invite").addEventListener("click", () => {
+            openWhatsApp(t("inviteText") + "\n" + DEEP_LINK_ORIGIN);
+        });
+        div.querySelector(".review-ask-never").addEventListener("click", () => {
+            try { localStorage.setItem("hive_review_never", "1"); } catch (e) {}
+            div.remove();
         });
         $chatInner.appendChild(div);
         scrollToBottom();
@@ -4009,6 +4066,73 @@ function buildShareMarkdown(rec) {
     return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+// ── WhatsApp / send to a friend (web 2026.11.17-b) ──
+// A friend reading a forwarded answer on a phone needs the gist and one link,
+// not the whole comparison. WhatsApp bolds with single asterisks and shows no
+// headings, and a wa.me link carries the full text inside its URL, so the
+// answer is cut to a readable length. The deep link re-creates the question on
+// the friend's side: prefilled, never auto-run, store link if no bridge.
+function clipShareText(s, max) {
+    const str = String(s == null ? "" : s).trim();
+    if (str.length <= max) return str;
+    const cut = str.slice(0, max);
+    const sp = cut.lastIndexOf(" ");
+    return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s,;:.\-]+$/, "") + "\u2026";
+}
+function toWhatsAppText(md) {
+    return String(md == null ? "" : md)
+        .replace(/\r/g, "")
+        .replace(/^[ \t]*#{1,6}[ \t]+/gm, "")
+        .replace(/\*\*([^*\n]+)\*\*/g, "*$1*")
+        .replace(/`+/g, "")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+}
+// A wa.me link carries the text in its URL, and Hebrew triples in length when
+// encoded, so the text is fitted to about 7,000 encoded characters: first a
+// shorter answer, then (for a very long question) the plain site link.
+function buildShareShort(rec) {
+    const compose = (answerMax, link) => {
+        const out = [];
+        const q = String(rec.question || "").replace(/\s+/g, " ").trim();
+        if (q) out.push("*" + clipShareText(q, 200).replace(/\*/g, "") + "*", "");
+        const answer = clipShareText(toWhatsAppText(rec.answer), answerMax);
+        if (answer) out.push(answer, "");
+        const trust = rec.trust;
+        if (trust) {
+            const names = (rec.engineNames || []).filter(Boolean).join(", ") || t("shareTheAIs");
+            const key = trust.agreement === "high" ? "shareAgreeHigh"
+                      : trust.agreement === "split" ? "shareAgreeSplit" : "shareAgreePartial";
+            out.push(t(key, { names: names }), "");
+        }
+        out.push(t("shareRunOwn"), link);
+        return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+    };
+    const deep = buildDeepLink(rec.question, rec.mode) || DEEP_LINK_ORIGIN;
+    const fits = x => encodeURIComponent(x).length <= 7000;
+    let text = compose(700, deep);
+    if (!fits(text)) text = compose(400, deep);
+    if (!fits(text)) text = compose(400, DEEP_LINK_ORIGIN);
+    return text;
+}
+function buildFactShare(record) {
+    const v = pokVerdict(record);
+    const normative = String(record.type || "").toLowerCase() === "contested-normative";
+    const key = normative ? "normative" : String(record.status || "").toLowerCase().replace(/-/g, "");
+    const label = (currentLang === "he" && I18N.he["vShare_" + key]) || v.label;
+    const claim = clipShareText(String(record.restated_claim || record.claim || "").replace(/\s+/g, " "), 240);
+    const n = (record.sources || []).length;
+    const out = [t("shareFactTitle"), "\u201C" + claim + "\u201D", "", v.icon + " *" + label + "*"];
+    if (!normative) out.push(t("shareFactSure", { sure: t("sure" + pokSureWord(record.confidence)), n: n }));
+    out.push("", t("shareFactCta"), buildDeepLink(record.claim || claim, "factcheck") || DEEP_LINK_ORIGIN);
+    return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+function openWhatsApp(text) {
+    if (!text) return false;
+    window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank", "noopener");
+    return true;
+}
+
 // navigator.clipboard rejects without a secure context or a user gesture in
 // some embeddings; the textarea path still works there.
 async function copyTextRobust(text) {
@@ -4067,6 +4191,7 @@ function renderSynthesis(rawText, brainId, workerResults) {
             ${trustHtml}
             <div class="synthesis-actions" data-share-id="${shareId}">
                 <button type="button" onclick="HIVE.copySynthesis(this)">Copy</button>
+                <button type="button" class="btn-wa" onclick="HIVE.shareWhatsApp(this)">WhatsApp</button>
                 <button type="button" onclick="HIVE.shareSynthesis(this)">Share</button>
                 <button type="button" onclick="HIVE.copyLink(this)">Link</button>
             </div>
@@ -4106,6 +4231,7 @@ function renderConsensus(text) {
             <div class="msg-bubble" dir="auto">${consensusToHtml(text)}</div>
             <div class="synthesis-actions" data-share-id="${shareId}">
                 <button type="button" onclick="HIVE.copyMsg(this)">Copy</button>
+                <button type="button" class="btn-wa" onclick="HIVE.shareWhatsApp(this)">WhatsApp</button>
                 <button type="button" onclick="HIVE.shareSynthesis(this)">Share</button>
                 <button type="button" onclick="HIVE.copyLink(this)">Link</button>
             </div>
@@ -5752,8 +5878,10 @@ function renderPOKRecord(record) {
                     </div>
                     <details style="margin-top:8px;"><summary>Raw data (JSON)</summary><pre class="pok-json">${escapeHtml(JSON.stringify(record, null, 2))}</pre></details>
                 </details>
-                <div class="synthesis-actions" style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <button type="button" onclick="HIVE.copyPOK('${record.id}')">Copy</button>
+                <div class="synthesis-actions" data-pok-id="${record.id}" style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <button type="button" onclick="HIVE.copyFact(this)">Copy</button>
+                    <button type="button" class="btn-wa" onclick="HIVE.shareWhatsApp(this)">WhatsApp</button>
+                    <button type="button" onclick="HIVE.shareSynthesis(this)">Share</button>
                     ${canContribute ? `<button type="button" title="Add this verified fact — with its sources — to the public HIVE Encyclopedia. Nothing else is uploaded." style="background:#e8b64c;color:#08222e;border:none;border-radius:8px;padding:6px 12px;font-weight:600;cursor:pointer;" onclick="HIVE.contributeFact('${record.id}', this)">🐝 Contribute to Encyclopedia</button>` : ""}
                 </div>
                 ${canContribute ? `<div style="margin-top:6px;font-size:11.5px;color:var(--text-secondary);opacity:.85;">Opt-in · only this claim + its sources become public — your question stays private.</div>` : ""}
@@ -6976,13 +7104,32 @@ window.HIVE = {
         const host = btn.closest(".synthesis-actions");
         const rec = host && SHARE_BUFFER[host.dataset.shareId];
         // Any card rendered before this feature still shares its plain text.
-        const payload = rec ? buildShareMarkdown(rec) : this._msgText(btn);
+        // A fact-check card shares its verdict, not the raw record.
+        const payload = host && host.dataset.pokId ? this._friendText(btn)
+                      : rec ? buildShareMarkdown(rec) : this._msgText(btn);
         if (!payload) return;
         if (navigator.share) {
             try { await navigator.share({ title: "HIVE", text: payload }); return; }
             catch (e) { if (e && e.name === "AbortError") return; }  // dismissed, not failed
         }
         showToast(await copyTextRobust(payload) ? t("sharedCopied") : t("shareFailed"));
+    },
+    // The friend-sized text for the card this button sits on (web 2026.11.17-b).
+    _friendText(btn) {
+        const host = btn.closest(".synthesis-actions");
+        if (host && host.dataset.pokId) {
+            const rec = (window._hivePOKBuffer || {})[host.dataset.pokId];
+            return rec ? buildFactShare(rec) : "";
+        }
+        const rec = host && SHARE_BUFFER[host.dataset.shareId];
+        return rec ? buildShareShort(rec) : clipShareText(this._msgText(btn), 900);
+    },
+    shareWhatsApp(btn) {
+        openWhatsApp(this._friendText(btn));
+    },
+    async copyFact(btn) {
+        const text = this._friendText(btn);
+        if (text) showToast(await copyTextRobust(text) ? t("copied") : t("shareFailed"));
     },
     // Deep link to this card's question + mode (web 2026.10.11-a).
     async copyLink(btn) {

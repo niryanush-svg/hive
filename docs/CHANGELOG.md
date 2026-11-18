@@ -1,3 +1,14 @@
+# Web 2026.11.17-b, 17.11.26 evening (built and tested; waiting for Nir's deploy)
+
+Nir's request, 17.11: easier sharing (a WhatsApp link, send to a friend), and a store-rating ask after a user's fifth run.
+- WhatsApp button on every Manager answer, Meeting consensus and Fact-check verdict. It opens wa.me with a short text: the question, the answer cut to about 700 characters (WhatsApp bold, no headings), the agreement line, and the deep link that re-creates the question. Fact-check sends the claim, the verdict, the confidence and the source count. The text is fitted to about 7,000 encoded characters, so long Hebrew still opens (checked: a 6,711-character link reaches api.whatsapp.com with 200).
+- The Fact-check card's Copy now copies that readable text instead of the raw JSON (the JSON is still under "Raw data"); its card also gains Share.
+- Store-rating card moved from runs 3 and 10 to runs 5 and 15 (successful runs only, never after a bad turn), with "Send HIVE to a friend" (WhatsApp invite) and "Don't ask again". Never offers anything in return or asks for a score.
+- Hebrew strings for all of it; the Hebrew rating title starts with a Hebrew word so the card stays right to left. Dark mode uses a brighter WhatsApp green.
+- Tests: 11 new checks in tools/tests/web.test.js (share texts in both languages, the URL budget, the 5/15 schedule, no stray Hebrew vowel marks); ALL PASS, 138 checks.
+- Checked in a local copy of the page: the buttons, the texts handed to WhatsApp, the invite, "Don't ask again" (card removed, flag stored), Hebrew right to left, dark mode.
+- The side panel shows the page inside a frame that does not allow the system share sheet, so there Share falls back to copying; the WhatsApp button opens normally.
+
 # Web 2026.11.17-a, 17.11.26 (Nir deployed; verified live)
 
 - Fact-check verdict: a refutation resting on two or more independent contradicting sources is no longer turned into "Genuinely disputed" because the critic listed an alternative explanation. Live run 17.11: "Water boils at 100 C at the summit of Everest", 7 independent sources contradicting, none supporting, 4 strong counters, verdict shown "Genuinely disputed, low". The guard that preserves live disputes now applies to a refutation only when it is thinly sourced. Four unit tests on the real aggregatePOK. Live re-run after deploy: same claim, "Likely false", high, 7 sources.
