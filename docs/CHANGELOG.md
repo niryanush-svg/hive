@@ -1,4 +1,12 @@
-# Web 2026.11.17-b, 17.11.26 evening (built and tested; waiting for Nir's deploy)
+# Web 2026.11.17-c, 17.11.26 night (built and tested; waiting for Nir's deploy)
+
+From Nir's fresh-profile run of the store build (new Chrome profile, store install, the HIVE app opened by itself):
+- The one-engine notice said "open another AI tab" while the Gemini and Claude tabs were already open and only waiting for a sign-in. It now names each missing engine and what it needs ("Gemini: the tab is open but not signed in ... sign in there", "Claude: no tab open, open claude.ai and sign in"), in English and Hebrew.
+- Citation chips no longer leak into answers. The run's synthesis carried "krater", "pages" and "androidauthority" after sentences: the labels of Claude's source chips, read in with the page text. A single lowercase site-like token (optionally "+N") after a sentence's closing punctuation at the end of a line is now dropped; code fences, short list items, abbreviations and Hebrew are left alone. Runs in scrubUiArtifacts, so it covers every engine and every extraction path.
+- After signing in to all three, the same run produced a full three-engine synthesis with an agreement and a disagreement line.
+- Tests: 11 new checks, ALL PASS, 149.
+
+# Web 2026.11.17-b, 17.11.26 evening (Nir deployed; live file identical to the tested build)
 
 Nir's request, 17.11: easier sharing (a WhatsApp link, send to a friend), and a store-rating ask after a user's fifth run.
 - WhatsApp button on every Manager answer, Meeting consensus and Fact-check verdict. It opens wa.me with a short text: the question, the answer cut to about 700 characters (WhatsApp bold, no headings), the agreement line, and the deep link that re-creates the question. Fact-check sends the claim, the verdict, the confidence and the source count. The text is fitted to about 7,000 encoded characters, so long Hebrew still opens (checked: a 6,711-character link reaches api.whatsapp.com with 200).

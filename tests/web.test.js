@@ -95,7 +95,7 @@ async function sim({ id = "chatgpt", script, opts, question = "q" }) {
     setTimeout: (fn, ms) => { now += ms; Promise.resolve().then(fn); },
   });
   vm.runInContext([grabFn("looksLikeSearchStub"), grabConst("NO_BROWSE_RETRY_MS"), grabConst("NO_BROWSE_PREFIX"),
-    grabFn("looksLikeAnswerStub"), grabFn("scrubUiArtifacts"), grabBridge(), "globalThis.__bridge = bridge;"].join("\n"), c);
+    grabFn("looksLikeAnswerStub"), grabFn("stripCitationChips"), grabFn("scrubUiArtifacts"), grabBridge(), "globalThis.__bridge = bridge;"].join("\n"), c);
   const b = c.__bridge, start = now;
   b.inject = async (i, q) => { injected.push(q); return { ok: true }; };
   b.poll = async () => script((now - start) / 1000, injected.length).poll;
@@ -163,7 +163,7 @@ async function sim({ id = "chatgpt", script, opts, question = "q" }) {
       setTimeout: (fn, ms) => { timers.push({ at: now + ms, fn }); },
     });
     vm.runInContext([grabFn("looksLikeSearchStub"), grabConst("QUORUM_GRACE_MS"), grabConst("QUORUM_ALIVE_MS"), grabConst("QUORUM_STREAMING_MS"), grabConst("QUORUM_MIN_TOTAL_MS"), grabFn("makeQuorum"), grabFn("quorumNoteOk"),
-      grabConst("NO_BROWSE_RETRY_MS"), grabConst("NO_BROWSE_PREFIX"), grabFn("looksLikeAnswerStub"), grabFn("scrubUiArtifacts"), grabBridge(),
+      grabConst("NO_BROWSE_RETRY_MS"), grabConst("NO_BROWSE_PREFIX"), grabFn("looksLikeAnswerStub"), grabFn("stripCitationChips"), grabFn("scrubUiArtifacts"), grabBridge(),
       "const engines = { queryEngine: (id, q, n, o) => bridge.queryEngine(id, q, n, o) };",
       html.slice(html.indexOf("\nasync function queryAllSilently("), html.indexOf("\n}", html.indexOf("\nasync function queryAllSilently(")) + 2),
       "globalThis.__bridge = bridge; globalThis.__fan = queryAllSilently;"].join("\n"), c);
@@ -366,7 +366,7 @@ async function sim({ id = "chatgpt", script, opts, question = "q" }) {
   // Page timestamps that come along with a scraped answer (1.11.26).
   {
     const c = vm.createContext({});
-    vm.runInContext(grabFn("scrubUiArtifacts"), c);
+    vm.runInContext(grabFn("stripCitationChips") + grabFn("scrubUiArtifacts"), c);
     const S = x => vm.runInContext("scrubUiArtifacts", c)(x);
     eq("scrub: just now at the end", S("Do not rent.\njust now"), "Do not rent.");
     eq("scrub: minutes ago at the end", S("Do not rent.\n2 minutes ago\nCopy"), "Do not rent.");
@@ -444,6 +444,22 @@ async function sim({ id = "chatgpt", script, opts, question = "q" }) {
     F("__lang")("en");
     eq("rating ask: runs 5 and 15 only", Array.from({ length: 30 }, (_, i) => i + 1).filter(F("reviewAskDue")), [5, 15]);
     eq("no stray Hebrew vowel marks in the page", (html.match(/ּ/g) || []).length, 0);
+
+    // ── fresh-profile run 17.11.26: single-engine notice + citation chips ──
+    vm.runInContext(grabConst("ENGINE_NAMES") + grabFn("singleEngineNotice") + grabFn("stripCitationChips"), sh);
+    const note = F("singleEngineNotice")({ chatgpt: { available: true }, gemini: { available: false, reason: "not_ready" }, claude: { available: false, reason: "no_tab" } }, ["chatgpt"]);
+    eq("single notice names Gemini as signed out", note.includes("Gemini: the tab is open but not signed in"), true);
+    eq("single notice tells where to open Claude", note.includes("Claude: no tab open — open claude.ai and sign in"), true);
+    eq("single notice does not list the engine that answered", note.includes("ChatGPT:"), false);
+    const CH = x => F("stripCitationChips")(x);
+    eq("chip after a sentence is dropped", CH("Perplexity Pro lists $20 monthly. krater\n- Annual billing differs."), "Perplexity Pro lists $20 monthly.\n- Annual billing differs.");
+    eq("chip with a count is dropped", CH("Google switched to five-hour windows. androidauthority +2"), "Google switched to five-hour windows.");
+    eq("chip after a closing parenthesis is dropped", CH("That is wrong for ChatGPT Plus (no annual plan). pages"), "That is wrong for ChatGPT Plus (no annual plan).");
+    eq("short list item kept", CH("1. apples"), "1. apples");
+    eq("abbreviation kept", CH("We tried several languages, e.g. python"), "We tried several languages, e.g. python");
+    eq("prose after a sentence kept", CH("Install it with npm. Then run it."), "Install it with npm. Then run it.");
+    eq("code fence kept", CH("```\nconsole.log(value). done\n```"), "```\nconsole.log(value). done\n```");
+    eq("Hebrew kept", CH("זה עובד מצוין כבר עכשיו. באמת"), "זה עובד מצוין כבר עכשיו. באמת");
   }
 
   console.log(fails || parseFail ? "\nFAILED " + (fails + parseFail) : "\nALL PASS");

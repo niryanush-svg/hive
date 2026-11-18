@@ -1156,7 +1156,7 @@ body.panel .landing-icon, body.panel .landing h1, body.panel .tagline, body.pane
                 <button class="btn btn--secondary" id="btnAutoDetect" data-i18n="autoDetect">Auto-detect</button>
             </div>
         </details>
-        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.11.17-b</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
+        <p style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-secondary);opacity:.7;">HIVE web build <span id="buildStamp">2026.11.17-c</span> · <a href="/privacy" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Privacy Policy</a> · <a href="/compare" style="color:inherit;text-decoration:underline;">HIVE vs doing it yourself</a> · <a href="https://github.com/niryanush-svg/hive" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Source on GitHub</a></p>
 
         <div style="margin-top:0.9rem;display:flex;align-items:center;gap:10px;">
             <label for="managerSelect" style="font-size:0.85rem;font-weight:600;white-space:nowrap;" data-i18n="managerPickLabel">Who runs the Manager?</label>
@@ -1433,6 +1433,10 @@ const I18N = {
         sureHigh: "high",
         sureMedium: "medium",
         sureLow: "low",
+        singleHead: "Only one AI answered \u2014 this is a single model's answer, not a cross-checked panel.",
+        singleNotReady: "{name}: the tab is open but not signed in (or still loading) \u2014 sign in there",
+        singleNoTab: "{name}: no tab open \u2014 open {host} and sign in",
+        singleTail: "Then ask again and the discussion between them starts by itself.",
         deepLinkReady: "Shared question loaded \u2014 press Send to run it across your AIs",
         deepLinkNoBridge: "Shared question loaded \u2014 install HIVE Bridge to run it across your AIs",
         busyWait: "HIVE is busy — wait for the current run to finish",
@@ -1589,6 +1593,10 @@ const I18N = {
         sureHigh: "גבוהה",
         sureMedium: "בינונית",
         sureLow: "נמוכה",
+        singleHead: "רק בינה אחת ענתה \u2014 זו תשובה של מודל יחיד, בלי בדיקה הדדית.",
+        singleNotReady: "{name}: הלשונית פתוחה אבל לא מחוברת (או עדיין נטענת) \u2014 צריך להתחבר שם",
+        singleNoTab: "{name}: אין לשונית פתוחה \u2014 לפתוח את {host} ולהתחבר",
+        singleTail: "אחר כך לשאול שוב, והדיון בין הבינות יתחיל לבד.",
         vShare_established: "מבוסס היטב",
         vShare_wellsupported: "כנראה נכון",
         vShare_selfattested: "נתמך רק בדברי הנוגע בדבר",
@@ -1779,13 +1787,32 @@ function hasSeriousHarm(flags) {
     return list.some(f => /health|medic|disease|drug|vaccin|suicid|death|injur|safety|danger|violen|legal|lawsuit|financ|fraud|defam|discriminat|[\u0590-\u05FF]/i.test(String(f)));
 }
 
+// Citation chips (fresh-profile run 17.11.26): Claude and ChatGPT show a source
+// as a chip after a sentence, and the page text carries its label into the
+// answer: "...Perplexity Pro $20. krater", "...wrong for ChatGPT Plus. pages".
+// One lowercase site-like token (optionally "+N") after the closing
+// punctuation, at the very end of a line, is a chip label, not prose. Lines in
+// code fences, short list items and abbreviations (e.g., i.e., etc.) are kept.
+function stripCitationChips(text) {
+    if (!text) return text;
+    let inFence = false;
+    return String(text).split("\n").map(line => {
+        if (/^\s*```/.test(line)) { inFence = !inFence; return line; }
+        if (inFence) return line;
+        const m = /^(.{15,}?)([.!?)\]"\u201D])\s+([a-z][a-z0-9-]*(?:\.[a-z0-9-]+)*)(?:\s*\+\d+)?\s*$/.exec(line);
+        if (!m || m[3].length > 40) return line;
+        if (/(?:\be\.g|\bi\.e|\betc|\bvs|\bcf)$/i.test(m[1])) return line;
+        return m[1] + m[2];
+    }).join("\n");
+}
+
 function scrubUiArtifacts(text) {
     if (!text) return text;
     const artifact = /^(edit|copy|copy code|share|retry|regenerate|thinking|just now|\d+\s*(?:s|secs?|seconds?|m|mins?|minutes?|h|hrs?|hours?)\s+ago|עריכה|העתק|שיתוף)$/i;
     const lines = String(text).split("\n");
     while (lines.length && (artifact.test(lines[0].trim()) || lines[0].trim() === "")) lines.shift();
     while (lines.length && (artifact.test(lines[lines.length - 1].trim()) || lines[lines.length - 1].trim() === "")) lines.pop();
-    return lines.join("\n").trim();
+    return stripCitationChips(lines.join("\n").trim());
 }
 
 // ── Bridge ──
@@ -3260,6 +3287,20 @@ function maybeAskForReview() {
     } catch (e) { /* never let the ask break the flow */ }
 }
 
+// Fresh-profile test 17.11.26: the old notice said "open another AI tab" while
+// the Gemini and Claude tabs were already open and only waiting for a sign-in;
+// a new user stalls right there. Name each missing engine and what it needs.
+function singleEngineNotice(engs, available) {
+    const hosts = { chatgpt: "chatgpt.com", gemini: "gemini.google.com", claude: "claude.ai" };
+    const parts = ["chatgpt", "gemini", "claude"].filter(id => (available || []).indexOf(id) < 0).map(id => {
+        const e = (engs && engs[id]) || {};
+        return e.reason === "not_ready"
+            ? t("singleNotReady", { name: ENGINE_NAMES[id] })
+            : t("singleNoTab", { name: ENGINE_NAMES[id], host: hosts[id] });
+    });
+    return [t("singleHead")].concat(parts.map(p => "\u2022 " + p), [t("singleTail")]).join("\n");
+}
+
 // ── Main entry point: branches on conductorMode ──
 async function conductQuery(question) {
     if (isBusy) return;
@@ -3325,7 +3366,7 @@ async function conductQuery(question) {
         // "panel" is a single model. Warn so the user doesn't over-trust it.
         // (Skip when the user deliberately chose single-provider mode.)
         if (available.length < 2 && !singleMode) {
-            renderNotice("Only one AI is connected — this is a single model's answer, not a cross-checked panel. Open another AI tab (ChatGPT / Gemini / Claude) and HIVE's debate kicks in automatically.");
+            renderNotice(singleEngineNotice(lastEngines, available));
         }
 
         if (effectiveMode === "conductor") {
